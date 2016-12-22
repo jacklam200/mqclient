@@ -1,0 +1,94 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/background"
+    android:gravity="center">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_marginTop="40dp"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:src="@mipmap/bg_upper" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:gravity="center"
+            android:layout_weight="5"
+            android:orientation="vertical">
+            <EditText
+                android:id="@+id/et_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/et_layout_margin"
+                android:background="@mipmap/inputs"
+                android:textColorHint="@color/red"
+                android:layout_alignParentBottom="true"
+                android:paddingLeft="@dimen/et_paddingLeft"
+                android:textSize="@dimen/et_textSize"
+                android:hint="@string/input_username" />
+
+            <EditText
+                android:id="@+id/et_psw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/et_layout_margin"
+                android:background="@mipmap/inputs"
+                android:inputType="textPassword"
+                android:textColorHint="@color/red"
+                android:paddingLeft="@dimen/et_paddingLeft"
+                android:textSize="@dimen/et_textSize"
+                android:hint="@string/input_psw" />
+
+            <EditText
+                android:id="@+id/et_alias"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/et_layout_margin"
+                android:background="@mipmap/inputs"
+                android:inputType="textPassword"
+                android:textColorHint="@color/red"
+                android:paddingLeft="@dimen/et_paddingLeft"
+                android:textSize="@dimen/et_textSize"
+                android:hint="@string/input_alias" />
+
+            <Button
+                android:id="@+id/bt_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/btn_layout_marginTop"
+                android:layout_marginBottom="@dimen/btn_layout_marginBottom"
+                android:background="@drawable/button_red_selector"
+                android:text="@string/confirm"
+                android:textColor="#ffffffff"
+                android:textSize="@dimen/btn_textSize"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!--<ImageView-->
+        <!--android:id="@+id/iv_qrcode"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="16dip"-->
+        <!--android:background="#ffffffff"-->
+        <!--android:padding="5dip" />-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="3"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@mipmap/bg_down" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

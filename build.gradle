@@ -1,0 +1,96 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion '25.0.0'
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
+    signingConfigs {
+        sigin {
+            keyAlias 'android.keystore'
+            keyPassword 'jack123456'
+            storeFile file('android.keystore')
+            storePassword 'jack123456'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    defaultConfig {
+        applicationId "cn.mqclient"
+        minSdkVersion 15
+        targetSdkVersion 22
+        signingConfig signingConfigs.sigin
+        versionCode 2
+        versionName "1.2"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    dexOptions {
+        incremental = true;
+        preDexLibraries = false
+        javaMaxHeapSize "2g"
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi','x86'
+            universalApk false
+        }
+    }
+
+}
+
+repositories {
+
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+
+    compile fileTree(dir: 'libs', include: '*.jar')
+    compile ('com.android.support:appcompat-v7:24.1.1')
+    compile ('com.android.support:support-v4:24.1.1')
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.google.zxing:core:3.3.0'
+    compile 'com.rabbitmq:amqp-client:4.0.0'
+    compile(name: 'mqbase', ext: 'aar')
+    compile 'com.umeng.analytics:analytics:latest.integration'
+
+     compile 'tv.danmaku.ijk.media:ijkplayer-java:0.7.5'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.7.5'
+
+
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.7.5'
+//    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.7.5'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.7.5'
+//    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.7.5'
+
+
+    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.7.5'
+
+    // green dao library
+    compile 'org.greenrobot:greendao:2.2.0'
+    testCompile 'junit:junit:4.12'
+
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="et_paddingLeft">20dp</dimen>
+    <dimen name="et_textSize">14dp</dimen>
+    <dimen name="et_layout_margin">8dp</dimen>
+
+    <dimen name="btn_textSize">18dp</dimen>
+    <dimen name="btn_layout_marginTop">15dp</dimen>
+    <dimen name="btn_layout_marginBottom">16dp</dimen>
+</resources>
