@@ -8,6 +8,7 @@ import java.io.Serializable;
 
 public class PieceMaterialModel implements Serializable ,IBanner{
     private String programmeId;//节目Id
+    private String id;
     private String pieceId;//模块Id
     private String materialId;//素材Id
     private String materialName;//素材名称
@@ -18,6 +19,14 @@ public class PieceMaterialModel implements Serializable ,IBanner{
     private Integer seconds = 0;;//秒
     private Integer adaptationType;//自适应方式
     private String url;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Integer getAdaptationType() {
         return adaptationType;

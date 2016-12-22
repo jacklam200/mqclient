@@ -61,7 +61,7 @@ public class ImageProcessor extends BaseProcessor<FrameLayout> implements Inacti
             file.status = FilePath.STATUS_NOTPLAY;
             file.url = item.getFile().get(mIndex).getUrl();
             mFileList.add(file);
-            addDownloadTask(item.getFile().get(mIndex).getUrl(), item.getId(), getAction());
+            addDownloadTask(item.getFile().get(mIndex).getUrl(), item.getFile().get(mIndex).getPieceId(), item.getFile().get(mIndex).getId());
 
         }
 
@@ -128,7 +128,7 @@ public class ImageProcessor extends BaseProcessor<FrameLayout> implements Inacti
                    if(mIndex >= model.size()){
                        mIndex = 0;
                    }
-                   addDownloadTask(model.get(mIndex).getUrl(), data.getId(), getAction());
+                   addDownloadTask(model.get(mIndex).getUrl(), model.get(mIndex).getPieceId(), model.get(mIndex).getId());
                }
             }
         }

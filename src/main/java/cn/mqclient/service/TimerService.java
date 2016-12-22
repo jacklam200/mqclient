@@ -172,7 +172,7 @@ public class TimerService extends IntentService {
                 public void run() {
                     List<cn.mqclient.provider.log.Log> mLogs =
                             ReadLogDao.getInstance(App.getInstance()).readSendLog(SharePref.getInstance().getString(SpConstants.WARRANTNO, ""));
-                    if(mLogs != null){
+                    if(mLogs != null && mLogs.size() > 0){
                         PlayLog log = new PlayLog();
                         log.setWARRANTNO(SharePref.getInstance().getString(SpConstants.WARRANTNO, ""));
                         log.setSeNumber(AppUtils.getSeNumber(App.getInstance()));
@@ -241,8 +241,8 @@ public class TimerService extends IntentService {
         Date date  = new Date(System.currentTimeMillis());
         List<Layer> list = ReadLayerDao.getInstance(App.getInstance()).read(date);
 
-        if(list != null){
-
+        if(list != null && list.size() > 0){
+            Log.d(this.getClass().getName(), "read layer Db size:" + list.size());
             for(int i = 0; i < list.size(); i++){
                 List<ComponentData> clist = JSON.parseArray(list.get(i).getJson(), ComponentData.class);
 
@@ -253,13 +253,16 @@ public class TimerService extends IntentService {
 
                     ModuleFile file = new ModuleFile("");
                     file.write(list.get(i).getName(), JSON.toJSONString(list.get(i)));
-
+                    Log.d(this.getClass().getName(), "read layer Db notify:"  + i);
                     PSubject.getInstance().notify(list.get(i),
                             clist, list.get(i).getName());
 
                 }
 
             }
+        }
+        else{
+            Log.d(this.getClass().getName(), "read layer Db empty");
         }
 
 

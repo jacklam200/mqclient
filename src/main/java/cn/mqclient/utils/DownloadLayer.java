@@ -3,11 +3,14 @@ package cn.mqclient.utils;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.alibaba.fastjson.JSON;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.mqclient.App;
 import cn.mqclient.Layer.common.DownloadListener;
+import cn.mqclient.Log;
 import cn.mqclient.entity.Command;
 import cn.mqclient.entity.Component;
 import cn.mqclient.entity.ComponentArray;
@@ -18,6 +21,7 @@ import cn.mqclient.http.download.base.DownloadManager;
 import cn.mqclient.http.download.base.DownloadStatus;
 import cn.mqclient.http.download.base.DownloadTask;
 import cn.mqclient.http.download.base.DownloadTaskListener;
+import cn.mqclient.rabbitpusher.RabbitPublishService;
 
 /**
  * Created by LinZaixiong on 2016/12/19.
@@ -76,7 +80,7 @@ public class DownloadLayer implements DownloadTaskListener {
             List<Component> programmeItems = data.get(i).getProgrammeItems();
 
             for(int j = 0; j < programmeItems.size(); j++){
-                List<PieceMaterialModel> list = programmeItems.get(i).getFile();
+                List<PieceMaterialModel> list = programmeItems.get(j).getFile();
                 if(list != null)
                     mList.addAll(list);
             }
@@ -93,7 +97,7 @@ public class DownloadLayer implements DownloadTaskListener {
 
                 if(list != null){
                     for(int j = 0; j < list.size(); j++){
-                        startDownload(list.get(i));
+                        startDownload(list.get(j));
                     }
                 }
 
@@ -107,13 +111,26 @@ public class DownloadLayer implements DownloadTaskListener {
 
             DownloadEntity entity = new DownloadEntity();
             entity.setUrl(model.getUrl());
+            entity.setDownloadId(Md5.MD5(model.getUrl()+model.getPieceId()+model.getId()));
             entity.setIndex(model.getMaterialId());
             entity.setAction("download");
             DownloadTask task = generateDownloadTask(entity);
+            Log.d(this.getClass().getName(), "startDownload id:" + task.getId());
+            Log.d(this.getClass().getName(), "startDownload:" + task.getUrl());
             DownloadManager.getInstance(App.getInstance()).addDownloadTask(task, this);
+
+        }
+        else{
+            onCompleted(null);
         }
     }
 
+    private boolean isDownloaded(String url){
+
+        boolean isRet = false;
+        isRet = DownloadManager.getInstance(App.getInstance()).isDownloaded(url);
+        return isRet;
+    }
     private DownloadTask generateDownloadTask(DownloadEntity entity){
 
         DownloadTask task = new DownloadTask();
@@ -121,7 +138,7 @@ public class DownloadLayer implements DownloadTaskListener {
         String suffix = entity.getUrl().substring(entity.getUrl().lastIndexOf("."));
         task.setFileName(fileName + suffix);
         task.setIndex(entity.getIndex());
-        task.setId(entity.getUrl());
+        task.setId(entity.getDownloadId());
         task.setAction(entity.getAction());
         task.setSaveDirPath(Environment.getExternalStorageDirectory().getPath()+
                 "/mqclient/" + fileName + "/");
@@ -133,33 +150,37 @@ public class DownloadLayer implements DownloadTaskListener {
 
     @Override
     public void onPrepare(DownloadTask downloadTask) {
-
+        Log.d(this.getClass().getName(), "onPrepare:" + (downloadTask != null ? downloadTask.getUrl() : ""));
     }
 
     @Override
     public void onStart(DownloadTask downloadTask) {
-
+        Log.d(this.getClass().getName(), "onStart:" + (downloadTask != null ? downloadTask.getUrl() : ""));
     }
 
     @Override
     public void onDownloading(DownloadTask downloadTask) {
-
+//        Log.d(this.getClass().getName(), "onDownloading:" + (downloadTask != null ? downloadTask.getUrl() : ""));
     }
 
     @Override
     public void onPause(DownloadTask downloadTask) {
-
+        Log.d(this.getClass().getName(), "onPause:" + (downloadTask != null ? downloadTask.getUrl() : ""));
     }
 
     @Override
     public void onCancel(DownloadTask downloadTask) {
-
+        Log.d(this.getClass().getName(), "onCancel:" + (downloadTask != null ? downloadTask.getUrl() : ""));
     }
 
     @Override
     public void onCompleted(DownloadTask downloadTask) {
+        Log.d(this.getClass().getName(), "onCompleted id:" + downloadTask.getId());
+        Log.d(this.getClass().getName(), "onCompleted:" + (downloadTask != null ? downloadTask.getUrl() : ""));
         mCompleteSize++;
         if(mCompleteSize == mList.size()){
+            Log.d(this.getClass().getName(), "download all done");
+            sendDoneMsg(cmd, "100%");
             dispatchLayer(mLayer ,DownloadStatus.DOWNLOAD_STATUS_COMPLETED, "100%");
         }
         else{
@@ -167,6 +188,7 @@ public class DownloadLayer implements DownloadTaskListener {
             int percent = 100;
             if(mList.size() != 0)
                 percent = mCompleteSize / mList.size() * 100;
+            sendDoneMsg(cmd, percent + "%");
             dispatchLayer(mLayer ,DownloadStatus.DOWNLOAD_STATUS_DOWNLOADING, percent + "%");
         }
     }
@@ -174,13 +196,39 @@ public class DownloadLayer implements DownloadTaskListener {
     @Override
     public void onError(DownloadTask downloadTask, int i) {
         int retry = 0;
+        Log.d(this.getClass().getName(), "onError id:" + downloadTask.getId());
+        Log.d(this.getClass().getName(), "onError:" + downloadTask.getUrl());
         if(downloadTask != null) {
 
             retry = downloadTask.getRetryTime();
+            Log.d(this.getClass().getName(), "onError:" + downloadTask.getUrl() + " times:" + retry);
             if (retry <= 3){
                 DownloadManager.getInstance(App.getInstance()).addDownloadTask(downloadTask, this);
             }
+            else{
+                sendUnDoneMsg(cmd, downloadTask.getUrl());
+            }
         }
 
+    }
+
+    private void sendDoneMsg(Command cmd, String percent){
+        if(cmd != null && !TextUtils.isEmpty(cmd.getServerName())){
+            cmd.setState(Command.CMD_DONE);
+            cmd.setData(""+percent);
+            String msg =  JSON.toJSONString(cmd);
+            RabbitPublishService service = new RabbitPublishService(cmd.getServerName());
+            service.send(msg);
+        }
+    }
+
+    private void sendUnDoneMsg(Command cmd, String msg1){
+        if(cmd != null && !TextUtils.isEmpty(cmd.getServerName())){
+            cmd.setState(Command.CMD_UNDONE);
+            cmd.setData("download failed:" + msg1);
+            String msg =  JSON.toJSONString(cmd);
+            RabbitPublishService service = new RabbitPublishService(cmd.getServerName());
+            service.send(msg);
+        }
     }
 }

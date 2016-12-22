@@ -27,6 +27,7 @@ import cn.mqclient.entity.Command;
 import cn.mqclient.entity.Data;
 import cn.mqclient.entity.http.MQConfigEntity;
 import cn.mqclient.http.download.base.DownloadManager;
+import cn.mqclient.rabbitpusher.RabbitPublishService;
 import cn.mqclient.rabbitpusher.io.MessageStream;
 import cn.mqclient.rabbitpusher.rabbitmq.ConnectionHandler;
 import cn.mqclient.rabbitpusher.rabbitmq.RabbitReader;
@@ -48,18 +49,21 @@ import cn.mqclient.utils.ThreadPool;
 
 public abstract class RabbitReaderService extends IntentService implements ConnectionHandler {
 	protected static final String INTENT_CONFIG = "config";
-	private RabbitReader rabbitReader;
-	private Channel channel;
-	private MessageStream stream;
 
 	private MQConfigEntity.MQConfig mConfig;
-	private Connection connectionServer;
-	private Channel channelServer;
 	private String serverName = "";
 	private KeepAliveTask keepAlive = new KeepAliveTask();
 	private MonitorScreen monitor = new MonitorScreen();
 	private String consumeTag = "";
 	protected InstallController mInstaller = new InstallController();
+
+	public static String SERIAL_NUMBER = "1";//客户端唯一标识
+	public final static String CLIENT_NAME = "AND_Client_";
+	public final static String SERVER_NAME = "AND_Server_";
+
+	Connection connectionClient;
+	Channel channelClient;
+
 	public RabbitReaderService() {
 		super("rabbit reader");
 	}
@@ -68,48 +72,14 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 	public void onCreate() {
 		super.onCreate();
 		monitor.initMonitor(App.getInstance());
-		keepAlive.createKeepAlive(this,this, " 惟石", "惟石信息服务",  KeepAliveTask.NOTIFICATION_ID_MESSAGE);
+		keepAlive.createKeepAlive(this,this, " 惟石", "惟石信息服务",
+				KeepAliveTask.NOTIFICATION_ID_MESSAGE);
 		if(mInstaller != null && InstallController.isInstall(this, "cn.kanwah.installservice")){
 			mInstaller.bind(this);
 		}
-//		stream = new RabbitFaninMessageStream(getHostName(), getUserName(), getUserPsw());
-//		channel = new Channel(getChannelName(), stream);
-//		stream.setChannel(getChannelName());
-//		stream.setServerChannel(getServerChannelName());
-//
-//		rabbitReader = new RabbitReader();
-//		rabbitReader.setConnectionHandler(this);
-//		rabbitReader.setMessageReceiver(new MessageReceiver() {
-//			@Override
-//			public void onMessageReceived(String message, String channel) {
-//				Log.d("RabbitReaderService", "channel:" + channel + " message:" + message);
-//				RabbitReaderService.this.onMessageReceived(stream, message);
-//			}
-//		});
-//		rabbitReader.subscribe(channel);
 	}
-	public static String SERIAL_NUMBER = "1";//客户端唯一标识
-	public final static String CLIENT_NAME = "AND_Client_";
-	public final static String SERVER_NAME = "AND_Server_";
 
-	Connection connectionClient;
-	Channel channelClient;
 
-	private void closeServer(){
-		if(connectionServer != null) {
-			try {
-
-				if (channelServer != null)
-					channelServer.close();
-				connectionServer.close();
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (TimeoutException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 
 	private void closeClient(){
 
@@ -148,24 +118,6 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		askForPermission();
 		monitor.startMonitor(App.getInstance());
-
-//		if(!InstallController.isInstall(this, "cn.kanwah.installservice")){
-//			ThreadPool.getInstance().submit(new Runnable() {
-//				@Override
-//				public void run() {
-//
-//					if(!InstallController.isInstall(App.getInstance(), "cn.kanwah.installservice")){
-//						boolean isCopyFinish = InstallController.copyApkFromAssets(App.getInstance(),
-//								"installservice.apk", Environment.getExternalStorageDirectory().getPath()+ "/mqclient/installservice.apk");
-//
-//						if(isCopyFinish){
-//							InstallController.installService(App.getInstance(),
-//									Environment.getExternalStorageDirectory().getPath()+ "/mqclient/installservice.apk");
-//						}
-//					}
-//				}
-//			});
-//		}
 		super.onStartCommand(intent, flags, startId);
 		return START_REDELIVER_INTENT;
 	}
@@ -173,39 +125,27 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 	@Override
 	public void onHandleIntent(Intent intent) {
 		Log.d("service", "onHandleIntent");
-//		try {
-//			channel.getStream().connect();
-//			Log.d("jacklam", "onHandleIntent connect");
-//			onConnectionSuccessful();
-//			while(running()){
-//				Log.d("jacklam", "read");
-//				rabbitReader.read(getChannelName());
-//			}
-//		} catch (Exception e) {
-//			Log.d("jacklam", "onHandleIntent:" + e.getMessage());
-//			e.printStackTrace();
-//		}
 
-		// test upload
-//		UploadService uploadService = new UploadService();
-//		try {
-//			uploadService.UploadImage("");
-//		}
-//		catch (Exception e){
-//			e.printStackTrace();
-//		}
 
 		//jackalm
-
 		mConfig = (MQConfigEntity.MQConfig) intent.getSerializableExtra(INTENT_CONFIG);
 		if(mConfig == null){
+			Log.d(this.getClass().getName(), "mConfig null");
 			return ;
 		}
+
+		receiveMQ();
+		install();
+		waitQueue();
+		onServiceClosing();
+	}
+
+	private void receiveMQ(){
 		try {
 
 //			closeClient();
 
-		final ConnectionFactory factory = new ConnectionFactory();
+			final ConnectionFactory factory = new ConnectionFactory();
 //        factory.setHost("192.168.0.126");
 //        factory.setUsername("android_client");
 //        factory.setPassword("its123");
@@ -214,85 +154,86 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 //		factory.setUsername("android_client");
 //		factory.setPassword("t7qRj18ht1Cj1yP0");
 
-		factory.setHost(mConfig.getHost());
-		factory.setUsername(mConfig.getUserName());
-		factory.setPassword(mConfig.getPassword());
+			factory.setHost(mConfig.getHost());
+			factory.setUsername(mConfig.getUserName());
+			factory.setPassword(mConfig.getPassword());
 			factory.setPort(mConfig.getPort());
 
 
-		connectionClient = factory.newConnection();
+			connectionClient = factory.newConnection();
 
-		channelClient = connectionClient.createChannel();
-		String client = CLIENT_NAME + SharePref.getInstance().getString(SpConstants.WARRANTNO, "");
+			channelClient = connectionClient.createChannel();
+			String client = CLIENT_NAME + SharePref.getInstance().getString(SpConstants.WARRANTNO, "");
 			Log.d("jacklam", "client:" + client);
-		channelClient.queueDeclare(client, true, false, false, null);
+			channelClient.queueDeclare(client, true, false, false, null);
 			Log.d("[x] Received ", "[*] Waiting for messages. To exit press CTRL+C");
 
-		Connection connectionServer = factory.newConnection();
-		final Channel channelServer = connectionServer.createChannel();
-		channelServer.queueDeclare(SERVER_NAME, true, false, false, null);
+			Connection connectionServer = factory.newConnection();
+			final Channel channelServer = connectionServer.createChannel();
+			channelServer.queueDeclare(SERVER_NAME, true, false, false, null);
 			channelClient.basicQos(1);
-		Consumer consumer = new DefaultConsumer(channelClient) {
-			@Override
-			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-					throws IOException {
-				consumeTag = consumerTag;
+			Consumer consumer = new DefaultConsumer(channelClient) {
+				@Override
+				public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+						throws IOException {
+					consumeTag = consumerTag;
 
-				//接收消息后处理
-				String message = new String(body, "UTF-8");
-				message = URLDecoder.decode(message, "UTF-8");
-				Log.d("[x] Received ", "message:" + message);
-//				System.out.println(" [x] Received '" + message + "'");
-				Command command = JSON.parseObject(message, Command.class);
-				command.setState(100);
+					//接收消息后处理
+					String message = new String(body, "UTF-8");
+					message = URLDecoder.decode(message, "UTF-8");
+					Log.d("[x] Received ", "message:" + message);
+					Command command = JSON.parseObject(message, Command.class);
 
-				try {
-					Thread.sleep(2000);
-					String data = "{" + Data.DATA + JSON.toJSONString(command.getData()) + "}";
-					command.setContent(data);
+					try {
+						Thread.sleep(2000);
+						String data = "{" + Data.DATA + JSON.toJSONString(command.getData()) + "}";
+						command.setContent(data);
+						RabbitReaderService.this.onMessageReceived(command, message);
+						//处理完成发送消息回服务端
+						serverName = command.getServerName();
+						command.setState(Command.CMD_RECEIVE);
+						RabbitPublishService service = new RabbitPublishService(serverName);
+						service.send(message);
 
-					//处理完成发送消息回服务端
-					RabbitReaderService.this.onMessageReceived(command, message);
-					message = JSON.toJSONString(command);
+					} catch (Exception e) {
+						command.setState(Command.CMD_FAILED);
+						command.setMessage(e.getMessage());
+						message = JSON.toJSONString(command);
+						serverName = command.getServerName();
+						RabbitPublishService service = new RabbitPublishService(serverName);
+						service.send(message);
+						Log.d(this.getClass().getName(), "exception:" + e.getMessage());
+						e.printStackTrace();
+					}
 
-
-					serverName = command.getServerName();
-					if(!TextUtils.isEmpty(serverName))
-						channelServer.basicPublish("", serverName, null, message.getBytes());
-					Log.d(" [x] Sent  ", "================");
-//					System.out.println(" [x] Sent '" + "================" + "'");
-				} catch (Exception e) {
-					command.setState(90);
-					command.setMessage(e.getMessage());
-					message = JSON.toJSONString(command);
-					serverName = command.getServerName();
-					if(!TextUtils.isEmpty(serverName))
-						channelServer.basicPublish("", serverName, null, message.getBytes());
-					e.printStackTrace();
 				}
-
-			}
-		};
-		channelClient.basicConsume(client, true, consumer);
+			};
+			channelClient.basicConsume(client, true, consumer);
 		}catch (Exception e){
-
+			Log.d(this.getClass().getName(), "exception:" + e.getMessage());
 		}
+
+	}
+
+	private void install(){
 
 		if(!InstallController.isInstall(this, "cn.kanwah.installservice")){
 
-			boolean isCopy = InstallController.copyApkFromAssets(this, "installservice.apk", Environment.getExternalStorageDirectory().getPath() + "/mqclient/service.apk");
+			boolean isCopy = InstallController.copyApkFromAssets(this, "installservice.apk",
+					Environment.getExternalStorageDirectory().getPath() + "/mqclient/service.apk");
 			if(isCopy){
 
-				boolean isInstall = InstallController.installService(this, Environment.getExternalStorageDirectory().getPath() + "/mqclient/service.apk");
+				boolean isInstall = InstallController.installService(this,
+						Environment.getExternalStorageDirectory().getPath() + "/mqclient/service.apk");
 
 				if(isInstall){
 					mInstaller.bind(this);
 				}
 			}
 		}
+	}
 
-
-
+	private void waitQueue(){
 		try {
 
 			synchronized (this){
@@ -304,7 +245,6 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 			e.printStackTrace();
 		}
 
-		onServiceClosing();
 	}
 
 	@Override

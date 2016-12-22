@@ -9,6 +9,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import cn.mqclient.Log;
 import cn.mqclient.entity.http.MQConfigEntity;
 import cn.mqclient.utils.ThreadPool;
 
@@ -17,7 +18,6 @@ import cn.mqclient.utils.ThreadPool;
  */
 
 public class RabbitPublishService implements Runnable {
-
     public final static String SERVER_NAME = "AND_Server_Android";
     private String serverName = "";
     private MQConfigEntity.MQConfig config = new MQConfigEntity.MQConfig();
@@ -57,13 +57,16 @@ public class RabbitPublishService implements Runnable {
                     connectionServer.close();
 
                 } catch (IOException e) {
+                    Log.d(this.getClass().getName(), "exception:" + e.getMessage());
                     e.printStackTrace();
                 } catch (TimeoutException e) {
+                    Log.d(this.getClass().getName(), "exception:" + e.getMessage());
                     e.printStackTrace();
                 }
             }
         }
         catch (Exception e){
+            Log.d(this.getClass().getName(), "exception:" + e.getMessage());
             e.printStackTrace();
         }
     }

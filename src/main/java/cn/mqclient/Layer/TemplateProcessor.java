@@ -191,6 +191,8 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
     private void processExpire(long timeMs){
 
         if(isExpire(timeMs)){// 过期超时不播放此节目
+
+            InactivityTimer.getInstance().cancel();
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                              @Override
@@ -210,21 +212,21 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
 //            dataArray.setTemplate(data.getTemplate());
 //            dataArray.setProgrammeItems(new ArrayList<Component>());
 //            dataArray.setData( new ArrayList<Component>());
-//            Log.d("jacklam", "clear : "+data.getTemplate());
-//            if(data != null){
-//
-//                ThreadPool.getInstance().submit(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        State state = new State("");
-//                        state.setId(data.getTemplate());
-//                        state.setTerminalGroupItemName(data.getTemplate());
-//                        OpStateDao.getInstance(App.getInstance()).delete(state);
-//
-//                    }
-//                });
-//
-//            }
+            Log.d("jacklam", "clear : "+data.getTemplate());
+            if(data != null){
+
+                ThreadPool.getInstance().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        State state = new State("");
+                        state.setId(data.getTemplate());
+                        state.setTerminalGroupItemName(data.getTemplate());
+                        OpStateDao.getInstance(App.getInstance()).delete(state);
+
+                    }
+                });
+
+            }
 //
 //            PSubject.getInstance().notify(dataArray, dataArray.getProgrammeItems(), data.getTemplate());
         }
@@ -241,11 +243,16 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
     private long totalTime = 0L;
 
     private void playNextPrograme(long timeMs) {
-        totalTime += 1000;
-        if(totalTime >= mDataList.get(currentIndex()).getTimeLenght()){
-            notifyDataSetChange();
-            enter(mDataList.get(currentIndex()).getId());
+
+        if(mDataList != null && mDataList.size() > 0){
+            totalTime += 1000;
+            if(totalTime >= mDataList.get(currentIndex()).getTimeLenght()){
+                notifyDataSetChange();
+                totalTime = 0;
+                enter(mDataList.get(currentIndex()).getId());
+            }
         }
+
     }
 
     public boolean isNeedTimer(){

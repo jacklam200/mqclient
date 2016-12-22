@@ -34,6 +34,7 @@ import cn.mqclient.entity.http.MQConfigEntity;
 import cn.mqclient.http.download.base.DownloadEntity;
 import cn.mqclient.provider.Layer;
 import cn.mqclient.provider.OpLayerDao;
+import cn.mqclient.rabbitpusher.RabbitPublishService;
 import cn.mqclient.rabbitpusher.io.MessageStream;
 import cn.mqclient.rabbitpusher.services.RabbitReaderService;
 import cn.mqclient.receiver.MessageReceiver;
@@ -82,179 +83,197 @@ public class SubscriberService extends RabbitReaderService {
     public void onMessageReceived(Command cmd, String message) {
 
        if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.CMD_PROGRAM) == 0){
-            String msg = cmd.getContent();
-            Log.d("FullscreenActivity", "cmd data:" + msg);
-           ComponentArray dataList = JSON.parseObject(msg, ComponentArray.class);
-           //TODO:看是否开启线程
-           DownloadLayer layer = new DownloadLayer(dataList, cmd);
-           layer.download();
-//            Message message = mHandler.obtainMessage(WHAT_CHANGE_LAYER, data);
-//            mHandler.sendMessage(message);
+
+           CMD_PROGRAM(cmd);
+
         }
         else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.CMD_REBOOT) == 0){
-           OsUtils.rebootNow();
+           reboot();
        }
        else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.PHOTOGRAPH) == 0){
-           CameraService.start(this, cmd.getId());
+           PHOTOGRAPH(cmd);
+
        }
         else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.SCREENSHOT) == 0){
-            //TODO:startRecord(Context context)
-           CameraService.startRecord(this, cmd.getId());
+           SCREENSHOT(cmd);
+          
        }
        else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.TIMED_SHUTDOWN) == 0){
-           String msg = cmd.getContent();
-           Command data = (Command)JSON.parseObject(msg, Command.class);
-//           msg = (String)data.getData();
-           Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
-           Long times = (Long)data.getData();
-
-           String date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(times));
-           String day = date.substring(0, 10);
-           String time = date.substring(11, 19);
-           if(times != null)
-                OsUtils.setPowerOff( day, time);
+           timingShutDown(cmd);
        }
        else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.TIMING_BOOT) == 0){
-           String msg = cmd.getContent();
-           Command data = (Command)JSON.parseObject(msg, Command.class);
-//           msg = (Long)data.getData();
-           Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
-           Long times = (Long)data.getData();
-
-           String date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(times));
-           String day = date.substring(0, 10);
-           String time = date.substring(11, 19);
-
-           if(times != null)
-               OsUtils.setPowerOn( day, time);
+           timingBoot(cmd);
        }
        else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.UPGRADE) == 0){
 
-           String msg = cmd.getContent();
-           Command data = (Command)JSON.parseObject(msg, Command.class);
-           msg = (String)data.getData();
-           if(!TextUtils.isEmpty(msg)){
-
-               UpdateApk.update(msg,
-                                   Environment.getExternalStorageDirectory().getPath() + "/mqclient/update.apk",
-                                   new UpdateApk.OnUpdateComplete() {
-                                       @Override
-                                       public void onComplete(int code, String path) {
-                                            if(code == 0){
-
-                                                try {
-                                                    Log.d("jacklam", "update apk:install" );
-                                                    int version = UpdateApk.getVersionNameFromApk(App.getInstance(),path);
-                                                    int vCode = AppUtils.getAppVersionCode(App.getInstance());
-                                                    if(version > vCode)
-                                                        mInstaller.install(path);
-                                                    else{
-                                                        Log.d("jacklam", "update apk: version error");
-                                                    }
-                                                }
-                                                catch (Exception e){
-                                                    Log.d("jacklam", "update apk:" + e.getMessage());
-                                                    e.printStackTrace();
-                                                }
-
-                                            }
-                                       }
-                                   });
-           }
+          UPGRADE(cmd);
        }
        else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.VOLUME) == 0){
 
-           String msg = cmd.getContent();
-           Command data = (Command)JSON.parseObject(msg, Command.class);
-//           msg = (String)data.getData();
-           Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
-           Integer times = (Integer)data.getData();
-
-           if(times != null){
-               OsUtils.setSystemVolume(App.getInstance(), times/10);
-           }
+           VOLUME(cmd);
        }
        else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.STOP) == 0){
-           SerializableFile<Command> sc = new SerializableFile<Command>(Environment.getExternalStorageDirectory().getPath()+ "/mqclient/" + "module.dic");
-           Command command = sc.read();
-           if(command != null) {
-               String msg = command.getContent();
-               Log.d("FullscreenActivity", "cmd data 2:" + msg);
-               cmd.setCmd(MqConstants.CMD_SPLIT);
-               cmd.setContent(msg);
-           }
+           STOP(cmd);
        }
        else if(cmd != null && cmd.getCmd() != null && cmd.getCmd().compareToIgnoreCase(MqConstants.STATE) == 0){
+           STATE(cmd);
 
        }
         sendBroadcast(MessageReceiver.getBroadcastIntent(cmd, getApplicationContext()));
-//        sendBroadcast(MessageReceiver.getBroadcastIntent(message, getApplicationContext()));
 
-//        if(stream != null){
-//            Command command = JSON.parseObject(message, Command.class);
-//            command.setState(100);
-//            message = JSON.toJSONString(command);
-//            try {
-//                stream.write(message);
-//                Log.d("SubscriberService", "SubscriberService write:" + message);
-//            }
-//            catch (Exception e){
-//                Log.d("SubscriberService", "SubscriberService:" + e.getMessage());
-//                e.printStackTrace();
-//            }
-//
-//        }
     }
 
-//    private Layer invert(ComponentData data, String msg){
-//        Layer layer = new Layer();
-//        layer.setId(data.getId());
-//        layer.setBegin_time(new Date(data.getBroadcastStartTime()));
-//        layer.setEnd_time(new Date(data.getBroadcastEndTime()));
-//        layer.setGroup_name(data.getId());
-//        layer.setJson(msg);
-//        layer.setName(data.getTemplate());
-//        return layer;
-//    }
-//
-//    private Layer invert2(long start, long end, ComponentData data, String msg){
-//        Layer layer = new Layer();
-//        layer.setId(data.getId() + UUID.randomUUID());
-//        layer.setBegin_time(new Date(start));
-//        layer.setEnd_time(new Date(end));
-//        layer.setGroup_name(data.getId());
-//        layer.setJson(msg);
-//        layer.setName(data.getTemplate());
-//        return layer;
-//    }
-//
-//    private void findResToDownload(List<Component> data){
-//
-//        if(data != null){
-//            for(int i = 0; i < data.size(); i++){
-//
-//                List<PieceMaterialModel> list = data.get(i).getFile();
-//                if(list != null){
-//                    for(int j = 0; j < list.size(); j++){
-//                        if(!TextUtils.isEmpty(list.get(j).getUrl()))
-//                            addDownloadTask(list.get(j).getUrl(), data.get(i).getId(), "download");
-//                    }
-//                }
-//
-//            }
-//        }
-//
-//    }
-//
-//    private void addDownloadTask(String url, String id, String action){
-//
-//        DownloadEntity entity = new DownloadEntity();
-//        entity.setUrl(url);
-//        entity.setIndex(id);
-//        entity.setDownloadTaskListener(new DownloadListener());
-//        entity.setAction(action);
-//        DownloadService.startDownloadService(getApplicationContext(), entity);
-//    }
+    private void sendDoneMsg(Command cmd){
+        if(cmd != null && !TextUtils.isEmpty(cmd.getServerName())){
+            cmd.setState(Command.CMD_DONE);
+            String msg =  JSON.toJSONString(cmd);
+            RabbitPublishService service = new RabbitPublishService(cmd.getServerName());
+            service.send(msg);
+        }
+    }
+
+    private void sendUnDoneMsg(Command cmd){
+        if(cmd != null && !TextUtils.isEmpty(cmd.getServerName())){
+            cmd.setState(Command.CMD_UNDONE);
+            String msg =  JSON.toJSONString(cmd);
+            RabbitPublishService service = new RabbitPublishService(cmd.getServerName());
+            service.send(msg);
+        }
+    }
+
+    private void STATE(Command cmd) {
+
+        if(cmd != null){
+            cmd.setState(100);
+            String msg =  JSON.toJSONString(cmd);
+            RabbitPublishService service = new RabbitPublishService(cmd.getServerName());
+            service.send(msg);
+        }
+
+    }
+
+    private void STOP(Command cmd) {
+        SerializableFile<Command> sc = new SerializableFile<Command>(Environment.getExternalStorageDirectory().getPath()+ "/mqclient/" + "module.dic");
+        Command command = sc.read();
+        if(command != null) {
+            String msg = command.getContent();
+            Log.d("FullscreenActivity", "cmd data 2:" + msg);
+            cmd.setCmd(MqConstants.CMD_SPLIT);
+            cmd.setContent(msg);
+            sendDoneMsg(cmd);
+        }
+
+    }
+
+    private void VOLUME(Command cmd) {
+        String msg = cmd.getContent();
+        Command data = (Command)JSON.parseObject(msg, Command.class);
+//           msg = (String)data.getData();
+        Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
+        Integer times = (Integer)data.getData();
+
+        if(times != null){
+            OsUtils.setSystemVolume(App.getInstance(), times/10);
+            sendDoneMsg(cmd);
+        }
+
+    }
+
+    private void UPGRADE(final Command cmd) {
+        String msg = cmd.getContent();
+        Command data = (Command)JSON.parseObject(msg, Command.class);
+        msg = (String)data.getData();
+        if(!TextUtils.isEmpty(msg)){
+
+            UpdateApk.update(msg,
+                    Environment.getExternalStorageDirectory().getPath() + "/mqclient/update.apk",
+                    new UpdateApk.OnUpdateComplete() {
+                        @Override
+                        public void onComplete(int code, String path) {
+                            if(code == 0){
+
+                                try {
+                                    Log.d("jacklam", "update apk:install" );
+                                    int version = UpdateApk.getVersionNameFromApk(App.getInstance(),path);
+                                    int vCode = AppUtils.getAppVersionCode(App.getInstance());
+                                    if(version > vCode){
+                                        mInstaller.install(path);
+                                        sendDoneMsg(cmd);
+                                    }
+
+
+                                    else{
+                                        Log.d("jacklam", "update apk: version error");
+                                    }
+                                }
+                                catch (Exception e){
+                                    Log.d("jacklam", "update apk:" + e.getMessage());
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }
+                    });
+        }
+
+    }
+
+    private void CMD_PROGRAM(Command cmd) {
+        String msg = cmd.getContent();
+        Log.d("FullscreenActivity", "cmd data:" + msg);
+        ComponentArray dataList = JSON.parseObject(msg, ComponentArray.class);
+        //TODO:看是否开启线程
+        DownloadLayer layer = new DownloadLayer(dataList, cmd);
+        layer.download();
+//            Message message = mHandler.obtainMessage(WHAT_CHANGE_LAYER, data);
+//            mHandler.sendMessage(message);
+    }
+
+    private void SCREENSHOT(Command cmd) {
+        CameraService.startRecord(this, cmd.getId());
+    }
+
+    private void reboot(){
+        OsUtils.rebootNow();
+
+    }
+
+    private void timingBoot(Command cmd){
+        String msg = cmd.getContent();
+        Command data = (Command)JSON.parseObject(msg, Command.class);
+//           msg = (Long)data.getData();
+        Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
+        Long times = (Long)data.getData();
+
+        String date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(times));
+        String day = date.substring(0, 10);
+        String time = date.substring(11, 19);
+
+        if(times != null)
+            OsUtils.setPowerOn( day, time);
+    }
+
+
+    private void timingShutDown(Command cmd){
+
+        String msg = cmd.getContent();
+        Command data = (Command)JSON.parseObject(msg, Command.class);
+//           msg = (String)data.getData();
+        Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
+        Long times = (Long)data.getData();
+
+        String date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(times));
+        String day = date.substring(0, 10);
+        String time = date.substring(11, 19);
+        if(times != null)
+            OsUtils.setPowerOff( day, time);
+    }
+
+    private void PHOTOGRAPH(Command cmd){
+        CameraService.start(this, cmd.getId());
+    }
+
+
 
     @Override
     public String getChannelName() {

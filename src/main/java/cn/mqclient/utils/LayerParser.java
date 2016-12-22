@@ -54,6 +54,7 @@ public class LayerParser {
                 Layer layer = invert2(times.get(i).getBroadcastStartTime(),
                         times.get(i).getBroadcastEndTime(),
                         data.getData().getId(),  getModuleName(data), programmes, cmd, status, percent);
+                Log.d("jacklam", "execute:");
                 OpLayerDao.getInstance(App.getInstance()).write(layer);
             }
 

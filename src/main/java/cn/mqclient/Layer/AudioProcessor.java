@@ -60,7 +60,8 @@ public class AudioProcessor extends BaseProcessor<View> implements MusicConstant
 
         if(item != null && item.getFile() != null && item.getFile().size()> 0){
             songs = item.getFile();
-            addDownloadTask(item.getFile().get(mIndex).getUrl(), data.getId(), getAction());
+            addDownloadTask(item.getFile().get(mIndex).getUrl(), item.getFile().get(mIndex).getPieceId(), item.getFile().get(mIndex).getId());
+//            addDownloadTask(item.getFile().get(mIndex).getUrl(), data.getId(), getAction());
 
         }
 //        initSongs(songs);
@@ -102,7 +103,9 @@ public class AudioProcessor extends BaseProcessor<View> implements MusicConstant
                 mIndex = 0;
             }
             else{
-                addDownloadTask(songs.get(mIndex).getUrl(), data.getId(), getAction());
+                addDownloadTask(songs.get(mIndex).getUrl(), songs.get(mIndex).getPieceId(), songs.get(mIndex).getId());
+//                addDownloadTask(songs.get(mIndex).getUrl(), data.getId(), getAction());
+
             }
 
         }

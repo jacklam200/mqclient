@@ -8,6 +8,11 @@ import java.io.Serializable;
  * Created by KangXinghua on 2016/8/26.
  */
 public class Command implements Serializable{
+
+    public static final int CMD_RECEIVE = 100;
+    public static final int CMD_DONE = 101;
+    public static final int CMD_UNDONE = 102;
+    public static final int CMD_FAILED = 90;
     private String id;
     private String cmd;
     private Object data;

@@ -73,7 +73,7 @@ public class LoginRequest extends BaseRequest<TokenEntity> {
         this.name += name;
 
         this.clientVession += AppUtils.getAppVersionName(context);
-        this.diskSpace += AppUtils.getAvailableMem();
+        this.diskSpace += AppUtils.getAvailableMem() +"/" + AppUtils.getTotalMem();
         this.height += AppUtils.getResolutionHeight(context);
         this.ip += AppUtils.getLocalIpAddress(context);
         this.latitude += SharePref.getInstance().getString("latitude", "-1");
@@ -81,7 +81,7 @@ public class LoginRequest extends BaseRequest<TokenEntity> {
         this.mac += AppUtils.getLocalMacAddressFromWifiInfo(context);
         this.orientation += AppUtils.getOrientation(context);
         this.seNumber += AppUtils.getSeNumber(context);
-        this.systemType += AppUtils.getSystemVersion();
+        this.systemType += "";//AppUtils.getSystemVersion();
         this.width += AppUtils.getResolutionWidth(context);
         counting = SharePref.getInstance().getString("counting", "");
     }

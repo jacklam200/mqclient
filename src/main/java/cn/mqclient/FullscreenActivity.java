@@ -90,6 +90,7 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Log.d(FullscreenActivity.this.getClass().getName(), "Update UI");
                 mAdapter.notifyDataSetChanged(data, list, template);
             }
         });

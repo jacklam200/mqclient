@@ -112,7 +112,7 @@ public class VideoProcessor extends BaseProcessor<IjkVideoView> implements IMedi
         Log.d("jacklam", "video playVideo idx:" + idx);
         if(true/*path.compareToIgnoreCase(paths.get(idx).getUrl()) != 0*/){
             Log.d("jacklam", "video playVideo addDownloadTask:" + paths.get(idx).getUrl());
-            addDownloadTask(paths.get(idx).getUrl(), data.getId(), getAction());
+            addDownloadTask(paths.get(idx).getUrl(), paths.get(idx).getPieceId(), paths.get(idx).getId());
         }
 
     }
@@ -127,7 +127,7 @@ public class VideoProcessor extends BaseProcessor<IjkVideoView> implements IMedi
                 file.status = FilePath.STATUS_NOTPLAY;
                 file.url = item.getFile().get(i).getUrl();
                 mFileList.add(file);
-                addDownloadTask(item.getFile().get(i).getUrl(), data.getId(), getAction());
+                addDownloadTask(item.getFile().get(i).getUrl(), item.getFile().get(i).getPieceId(), item.getFile().get(i).getId());
             }
 
         }

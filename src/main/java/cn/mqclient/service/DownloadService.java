@@ -101,7 +101,7 @@ public class DownloadService extends Service {
 
         DownloadTask task = generateDownloadTask(entity);
         // 已经下载完成的
-        if(!isDownloaded(entity.getUrl())){
+        if(!isDownloaded(entity.getDownloadId())){
             Log.d(TAG, "isDownloaded FALSE");
             DownloadManager.getInstance(App.getInstance()).addDownloadTask(task, entity.getTaskListener());
         }
@@ -121,7 +121,7 @@ public class DownloadService extends Service {
         String suffix = entity.getUrl().substring(entity.getUrl().lastIndexOf("."));
         task.setFileName(fileName + suffix);
         task.setIndex(entity.getIndex());
-        task.setId(entity.getUrl());
+        task.setId(entity.getDownloadId());
         task.setAction(entity.getAction());
         task.setSaveDirPath(Environment.getExternalStorageDirectory().getPath()+ "/mqclient/" + fileName + "/");
         task.setUrl(entity.getUrl());

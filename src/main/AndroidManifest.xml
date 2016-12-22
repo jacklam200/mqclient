@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="cn.mqclient"
+
     >
+    <!--android:sharedUserId="android.uid.system"-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- 这个权限用于进行网络定位-->
@@ -34,6 +36,7 @@
     <uses-feature android:name="android.hardware.camera.flash" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

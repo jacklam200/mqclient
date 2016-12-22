@@ -64,7 +64,7 @@ public class BackGroundProcessor extends BaseProcessor<View> {
             file.status = FilePath.STATUS_NOTPLAY;
             file.url = item.getFile().get(0).getUrl();
             mFileList.add(file);
-            addDownloadTask(item.getFile().get(0).getUrl(), item.getId(), getAction());
+            addDownloadTask(item.getFile().get(0).getUrl(), item.getFile().get(0).getPieceId(), item.getFile().get(0).getId());
 
         }
 

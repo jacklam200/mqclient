@@ -156,6 +156,7 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
 
     protected void addDownloadTask(String url, String index, String action){
         DownloadEntity entity = new DownloadEntity();
+        entity.setDownloadId(Md5.MD5(url+index+action));
         entity.setUrl(url);
         entity.setIndex(index);
         entity.setDownloadTaskListener(new DownloadListener());
