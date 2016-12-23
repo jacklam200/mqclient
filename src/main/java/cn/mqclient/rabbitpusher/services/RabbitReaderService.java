@@ -133,7 +133,7 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 			Log.d(this.getClass().getName(), "mConfig null");
 			return ;
 		}
-
+		//notityQueue();
 		receiveMQ();
 		install();
 		waitQueue();
@@ -247,6 +247,19 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 
 	}
 
+	private void notityQueue(){
+		try {
+
+			synchronized (this){
+				this.notifyAll();
+			}
+
+		}
+		catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public boolean onUnbind(Intent intent) {
 //		closeServer();
@@ -298,6 +311,7 @@ public abstract class RabbitReaderService extends IntentService implements Conne
 			monitor.endMonitor(App.getInstance());
 			monitor.destroyMonitor(App.getInstance());
 		}
+		notityQueue();
 		if(keepAlive != null)
 			keepAlive.destroyKeepService(this, this, KeepAliveTask.NOTIFICATION_ID_MESSAGE);
 

@@ -95,7 +95,7 @@
             </intent-filter>-->
         </activity>
 
-        <service android:name="cn.mqclient.service.SubscriberService" >
+        <service android:name="cn.mqclient.service.SubscriberService"  >
             <intent-filter android:priority="1000" >
                 <action android:name="cn.mqclient.service.SubscriberService" />
             </intent-filter>
@@ -105,7 +105,7 @@
                 <action android:name="cn.mqclient.service.DownloadService" />
             </intent-filter>
         </service>
-        <service android:name="cn.mqclient.service.MediaService" >
+        <service android:name="cn.mqclient.service.MediaService"  >
             <intent-filter android:priority="1000" >
                 <action android:name="cn.mqclient.service.MediaService" />
             </intent-filter>
@@ -115,12 +115,12 @@
                 <action android:name="cn.mqclient.service.TimerService" />
             </intent-filter>
         </service>
-        <service android:name="cn.mqclient.service.autoTake.CameraService" >
+        <service android:name="cn.mqclient.service.autoTake.CameraService"  >
             <intent-filter android:priority="1000" >
                 <action android:name="cn.mqclient.service.autoTake.CameraService" />
             </intent-filter>
         </service>
-        <service android:name="cn.mqclient.widget.media.MediaPlayerService" >
+        <service android:name="cn.mqclient.widget.media.MediaPlayerService"  >
             <intent-filter android:priority="1000" >
                 <action android:name="cn.mqclient.service.autoTake.CameraService" />
             </intent-filter>

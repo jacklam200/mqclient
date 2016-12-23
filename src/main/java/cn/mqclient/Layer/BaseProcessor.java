@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -125,8 +126,9 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
         if(view != null){
             view.setTag(KEY_TAG, this);
         }
-        execute(context, item);
         setView(view);
+        execute(context, item);
+
 
         if(item != null){
 
@@ -155,13 +157,20 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
     }
 
     protected void addDownloadTask(String url, String index, String action){
-        DownloadEntity entity = new DownloadEntity();
-        entity.setDownloadId(Md5.MD5(url+index+action));
-        entity.setUrl(url);
-        entity.setIndex(index);
-        entity.setDownloadTaskListener(new DownloadListener());
-        entity.setAction(action);
-        DownloadService.startDownloadService(mContext, entity);
+//        DownloadEntity entity = new DownloadEntity();
+//        entity.setDownloadId(url);
+//        entity.setUrl(url);
+//        entity.setIndex(index);
+//        entity.setDownloadTaskListener(new DownloadListener());
+//        entity.setAction(action);
+//        DownloadService.startDownloadService(mContext, entity);
+        if(!TextUtils.isEmpty(url)){
+            String fileName = Md5.MD5(url);
+            String suffix = url.substring(url.lastIndexOf("."));
+            String filePath = Environment.getExternalStorageDirectory().getPath()+ "/mqclient/" + fileName + "/" + fileName + suffix;
+            onDownloadComplete(url, filePath, index);
+        }
+
     }
 
     protected String getAction(){
@@ -223,19 +232,23 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
 
     private LogRecorder recorder = null;
 
-    protected void enter(String id){
+    protected void enter(String id, String temp){
+        Log.d(this.getClass().getName(), "log programe id:" + id);
+        Log.d(this.getClass().getName(), "log TerminalGroupItemName:" + temp);
         exit();
         if(this instanceof TemplateProcessor){
 
+            Log.d(this.getClass().getName(), "log enter  TemplateProcessor:" + id);
+
+            recorder =
+                    new LogRecorder(id, temp,
+                            SharePref.getInstance().getString(SpConstants.WARRANTNO, ""),
+                            System.currentTimeMillis(), System.currentTimeMillis(), System.currentTimeMillis());
+            Log.d(this.getClass().getName(), "log start:" + id);
+            recorder.start();
         }
         else{
-            if(data != null){
-                recorder =
-                        new LogRecorder(id, data.getTerminalGroupItemName(),
-                                SharePref.getInstance().getString(SpConstants.WARRANTNO, ""),
-                                System.currentTimeMillis(), System.currentTimeMillis(), System.currentTimeMillis());
-                recorder.start();
-            }
+
 
         }
     }
@@ -243,12 +256,12 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
     protected void exit(){
 
         if(this instanceof TemplateProcessor){
-
-        }
-        else{
-            if(data != null && recorder != null){
+            if(recorder != null){
                 recorder.end();
             }
+        }
+        else{
+
         }
     }
 

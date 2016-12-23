@@ -229,6 +229,8 @@ public class InstallController {
         return false;
     }
 
+
+
     private static boolean returnResult(int value){
         // 代表成功
         if (value == 0) {

@@ -166,7 +166,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             SharePref.getInstance().setValue(SpConstants.ENDTIME, result.getData().getEndTime());
             SharePref.getInstance().setValue(SpConstants.BIND, true);
             SharePref.getInstance().setValue("counting", result.getData().getCounting());
-            TimerService.startWithText(this, result.getData().getCounting());
+//            TimerService.startWithText(this, result.getData().getCounting());
             sendMQConfig(result.getData().getToken());
 
         }

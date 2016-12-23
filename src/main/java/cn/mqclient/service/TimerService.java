@@ -93,6 +93,7 @@ public class TimerService extends IntentService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+
         if(textManager != null){
             textManager.startScreen(this);
         }
@@ -118,6 +119,7 @@ public class TimerService extends IntentService {
                 if(TextUtils.isEmpty(TEXT_CONTENT)){
                     TEXT_CONTENT = SharePref.getInstance().getString("counting", "");
                 }
+                Log.d(this.getClass().getName(), "TEXT_CONTENT:" + TEXT_CONTENT);
 
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
@@ -129,10 +131,11 @@ public class TimerService extends IntentService {
 
 
             }
-            process();
+//            process();
         }
         else{
             TEXT_CONTENT = text;
+            Log.d(this.getClass().getName(), "TEXT_CONTENT:" + TEXT_CONTENT);
             if(textManager != null){
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
@@ -143,6 +146,9 @@ public class TimerService extends IntentService {
                 });
             }
         }
+        process();
+
+
 
     }
 
@@ -161,6 +167,7 @@ public class TimerService extends IntentService {
             }
 
         }
+
     }
 
     private void sendLog() {
@@ -240,7 +247,8 @@ public class TimerService extends IntentService {
     private void readDb(){
         Date date  = new Date(System.currentTimeMillis());
         List<Layer> list = ReadLayerDao.getInstance(App.getInstance()).read(date);
-
+        List<Layer> list2 = ReadLayerDao.getInstance(App.getInstance()).read(date, -1);
+        Log.d(this.getClass().getName(), "read layer all Db size:" + list2.size());
         if(list != null && list.size() > 0){
             Log.d(this.getClass().getName(), "read layer Db size:" + list.size());
             for(int i = 0; i < list.size(); i++){

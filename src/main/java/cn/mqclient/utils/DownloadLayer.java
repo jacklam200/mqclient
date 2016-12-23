@@ -5,6 +5,8 @@ import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
 
+import org.apache.commons.collections4.list.SetUniqueList;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class DownloadLayer implements DownloadTaskListener {
 
     private ComponentArray mLayer;
     private Command cmd;
-    private List<PieceMaterialModel> mList = new ArrayList<>();
+    private List<String> mList =  SetUniqueList.setUniqueList(new ArrayList<String>());
     private int mCompleteSize = 0;
     private LayerParser parser = new LayerParser();
 
@@ -81,10 +83,16 @@ public class DownloadLayer implements DownloadTaskListener {
 
             for(int j = 0; j < programmeItems.size(); j++){
                 List<PieceMaterialModel> list = programmeItems.get(j).getFile();
-                if(list != null)
-                    mList.addAll(list);
+                if(list != null){
+                    for(int k = 0; k < list.size(); k++){
+                        if(!TextUtils.isEmpty(list.get(k).getUrl()))
+                            mList.add(list.get(k).getUrl().trim());
+                    }
+                }
             }
         }
+
+        Log.d(this.getClass().getName(), "collect list:" + mList.toString());
     }
 
     private void findResToDownload(List<Component> programmeItems) {
@@ -111,7 +119,7 @@ public class DownloadLayer implements DownloadTaskListener {
 
             DownloadEntity entity = new DownloadEntity();
             entity.setUrl(model.getUrl());
-            entity.setDownloadId(Md5.MD5(model.getUrl()+model.getPieceId()+model.getId()));
+            entity.setDownloadId(model.getUrl());
             entity.setIndex(model.getMaterialId());
             entity.setAction("download");
             DownloadTask task = generateDownloadTask(entity);
@@ -120,9 +128,9 @@ public class DownloadLayer implements DownloadTaskListener {
             DownloadManager.getInstance(App.getInstance()).addDownloadTask(task, this);
 
         }
-        else{
-            onCompleted(null);
-        }
+//        else{
+//            onCompleted(null);
+//        }
     }
 
     private boolean isDownloaded(String url){
@@ -175,9 +183,9 @@ public class DownloadLayer implements DownloadTaskListener {
 
     @Override
     public void onCompleted(DownloadTask downloadTask) {
-        Log.d(this.getClass().getName(), "onCompleted id:" + downloadTask.getId());
-        Log.d(this.getClass().getName(), "onCompleted:" + (downloadTask != null ? downloadTask.getUrl() : ""));
+        Log.d(this.getClass().getName(), "onCompleted id:" + downloadTask.getId()+ " list size:" + mList.size());
         mCompleteSize++;
+        Log.d(this.getClass().getName(), "onCompleted:" + (downloadTask != null ? downloadTask.getUrl() : "") + " completeSize:" + mCompleteSize);
         if(mCompleteSize == mList.size()){
             Log.d(this.getClass().getName(), "download all done");
             sendDoneMsg(cmd, "100%");
@@ -196,13 +204,14 @@ public class DownloadLayer implements DownloadTaskListener {
     @Override
     public void onError(DownloadTask downloadTask, int i) {
         int retry = 0;
-        Log.d(this.getClass().getName(), "onError id:" + downloadTask.getId());
+        Log.d(this.getClass().getName(), "onError id:" + downloadTask.getId() + " list size:" + mList.size());
         Log.d(this.getClass().getName(), "onError:" + downloadTask.getUrl());
         if(downloadTask != null) {
 
             retry = downloadTask.getRetryTime();
             Log.d(this.getClass().getName(), "onError:" + downloadTask.getUrl() + " times:" + retry);
             if (retry <= 3){
+
                 DownloadManager.getInstance(App.getInstance()).addDownloadTask(downloadTask, this);
             }
             else{

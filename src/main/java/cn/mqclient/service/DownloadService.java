@@ -76,23 +76,26 @@ public class DownloadService extends Service {
 
     private void process(Intent intent){
         Log.d(TAG, "startDownloadService process");
-        DownloadEntity entity = (DownloadEntity)intent.getSerializableExtra(DOWNLOAD_TASK_SERIALIZABLE);
-        // 传空，字串为空， 监听器为空都不启动
-        if(entity != null &&
-                entity.getTaskListener() != null){
-            Log.d(TAG, "startTask URL" + entity.getUrl());
-            if(!TextUtils.isEmpty(entity.getUrl())){
-                Log.d(TAG, "startTask");
-                startTask(entity);
-            }
-            else{
-                Log.d(TAG, "URL EMPTY");
-                if(entity.getTaskListener() != null){
-                    entity.getTaskListener().onError(null, 404);
+        if(intent != null){
+            DownloadEntity entity = (DownloadEntity)intent.getSerializableExtra(DOWNLOAD_TASK_SERIALIZABLE);
+            // 传空，字串为空， 监听器为空都不启动
+            if(entity != null &&
+                    entity.getTaskListener() != null){
+                Log.d(TAG, "startTask URL" + entity.getUrl());
+                if(!TextUtils.isEmpty(entity.getUrl())){
+                    Log.d(TAG, "startTask");
+                    startTask(entity);
                 }
-            }
+                else{
+                    Log.d(TAG, "URL EMPTY");
+                    if(entity.getTaskListener() != null){
+                        entity.getTaskListener().onError(null, 404);
+                    }
+                }
 
+            }
         }
+
 
 
     }

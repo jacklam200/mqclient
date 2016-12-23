@@ -406,16 +406,16 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        /*if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
 
             moveTaskToBack(false);
             Intent home = new Intent(Intent.ACTION_MAIN);
-            home.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//            home.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             home.addCategory(Intent.CATEGORY_HOME);
             startActivity(home);
 
             return true;
-        }*/
+        }
         return super.onKeyDown(keyCode, event);
     }
 
@@ -472,7 +472,7 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
         InactivityTimer.getInstance().shutdown();
 //        SubscriberService.stop(this);
         unregisterReceiver(receiver);
-        destroyTimer();
+//        destroyTimer();
         PSubject.getInstance().deRegister(this);
     }
 

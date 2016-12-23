@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import java.io.File;
+
 import cn.mqclient.entity.http.MQConfigEntity;
 import cn.mqclient.service.SubscriberService;
+import cn.mqclient.service.autoInstall.InstallController;
 import cn.mqclient.utils.SharePref;
 import cn.mqclient.utils.SpConstants;
 
@@ -20,6 +23,12 @@ public class LaucherActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_launcher);
+        if(InstallController.hasRootPerssion()){
+            Log.d("jacklam", "has root permission");
+        }
+        else{
+            Log.d("jacklam", "not root permission");
+        }
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

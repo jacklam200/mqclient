@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 
+import cn.mqclient.Log;
 import cn.mqclient.service.autoTake.ImageCompressUtil;
 
 /**
@@ -22,6 +24,43 @@ import cn.mqclient.service.autoTake.ImageCompressUtil;
  */
 
 public class CaptureScreen {
+
+    private static boolean execute(String[] cmd){
+        PrintWriter PrintWriter = null;
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec("su");
+            PrintWriter = new PrintWriter(process.getOutputStream());
+            for(int i = 0; i < cmd.length; i++){
+                PrintWriter.println(cmd[i]);
+            }
+//          PrintWriter.println("exit");
+            PrintWriter.flush();
+            PrintWriter.close();
+            int value = process.waitFor();
+            Log.d("jacklam", value +" execute cmd" );
+            return returnResult(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            if(process!=null){
+                process.destroy();
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean returnResult(int value){
+        // 代表成功
+        if (value == 0) {
+            return true;
+        } else if (value == 1) { // 失败
+            return false;
+        } else { // 未知情况
+            return false;
+        }
+    }
     /**
 
      * 截屏
@@ -35,14 +74,19 @@ public class CaptureScreen {
     public static File captureScreen(Context context, String mSavedPath) {
 
         // piex生成Bitmap
-
         File saveFile = null;
-
         try {
-            Runtime. getRuntime().exec(  new String[] { "/system/bin/su", "-c", "screencap -p " + mSavedPath});
-            Thread.sleep(1000 * 5);
+            String []cmd = {"screencap -p " + mSavedPath};
+            if(execute(cmd)){
+                Thread.sleep(1000 * 5);
+                saveFile = new File(mSavedPath);
+            }
 
-            saveFile = new File(mSavedPath);
+            if(saveFile != null && saveFile.exists()){
+
+                Log.d("jacklam", "captureScreen success" );
+            }
+
 
         } catch (Exception e) {
             e.printStackTrace();

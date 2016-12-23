@@ -124,8 +124,8 @@
     <orderEntry type="library" exported="" name="slf4j-api-1.7.21" level="project" />
     <orderEntry type="library" exported="" name="pinyin4j-2.5.0" level="project" />
     <orderEntry type="library" exported="" name="javax.activation-1.1.0.v201105071233" level="project" />
+    <orderEntry type="library" exported="" name="analytics-6.0.7" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-24.1.1" level="project" />
-    <orderEntry type="library" exported="" name="analytics-6.0.6" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-24.1.1" level="project" />
     <orderEntry type="library" exported="" name="greendao-2.2.0" level="project" />
     <orderEntry type="library" exported="" name="support-vector-drawable-24.1.1" level="project" />

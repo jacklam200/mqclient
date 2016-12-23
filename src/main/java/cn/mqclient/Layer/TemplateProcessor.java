@@ -103,7 +103,7 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
                 mDataList.addAll(list);
                 if(list != null && list.size() > 0){
                     mList.addAll(mDataList.get(currentIndex()).getProgrammeItems());
-                    enter(mDataList.get(currentIndex()).getId());
+                    enter(mDataList.get(currentIndex()).getId(), mDataList.get(currentIndex()).getTemplate());
                 }
 
                 if(mAdapter != null){
@@ -249,7 +249,7 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
             if(totalTime >= mDataList.get(currentIndex()).getTimeLenght()){
                 notifyDataSetChange();
                 totalTime = 0;
-                enter(mDataList.get(currentIndex()).getId());
+                enter(mDataList.get(currentIndex()).getId(), mDataList.get(currentIndex()).getTemplate());
             }
         }
 
