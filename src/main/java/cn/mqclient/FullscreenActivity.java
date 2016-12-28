@@ -2,10 +2,13 @@ package cn.mqclient;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Environment;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -62,6 +65,17 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
     private String moduleId = "";
     private String lockId = "";
     private LayerListView mq_list;
+    private ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     public static void start(Context context) {
         Intent starter = new Intent(context, FullscreenActivity.class);
@@ -84,16 +98,30 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
 
     }
 
+    private class UIRunnable implements Runnable {
+
+        private Layer data;
+        private List<ComponentData> list;
+        private String template;
+        public UIRunnable( Layer data,  List<ComponentData> list, String template){
+            this.data = data;
+            this.list = list;
+            this.template = template;
+            Log.d(FullscreenActivity.this.getClass().getName(), "constructor Update UI");
+            Log.d(FullscreenActivity.this.getClass().getName(), "constructor data:" + data);
+            Log.d(FullscreenActivity.this.getClass().getName(), "constructor list:" + list);
+        }
+        @Override
+        public void run() {
+            Log.d(FullscreenActivity.this.getClass().getName(), "Update UI");
+            Log.d(FullscreenActivity.this.getClass().getName(), "data:" + data);
+            Log.d(FullscreenActivity.this.getClass().getName(), "list:" + list);
+            mAdapter.notifyDataSetChanged(data, list, template);
+        }
+    }
     @Override
-    public void Update( final Layer data, final List<ComponentData> list, final String template) {
-        Handler handler = new Handler(this.getMainLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(FullscreenActivity.this.getClass().getName(), "Update UI");
-                mAdapter.notifyDataSetChanged(data, list, template);
-            }
-        });
+    public void Update( Layer data, List<ComponentData> list, String template) {
+        mHandler.post(new UIRunnable(data, list, template));
 
     }
 
@@ -147,7 +175,7 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
                 });
                 FullscreenActivity view = mView.get();
                 SubscriberService.stop(view);
-                TimerService.stop(view);
+                TimerService.stop(view, view.conn);
                 InactivityTimer.getInstance().shutdown();
                 LoginActivity.start(view);
                 view.finish();
@@ -314,8 +342,7 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
     }
 
     private void initTimer(){
-        Intent intent = new Intent(this, TimerService.class);
-        startService(intent);
+        TimerService.start(this, conn);
     }
 
     public void setBackGroud(String url, String tempate){
@@ -477,8 +504,7 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
     }
 
     private void destroyTimer(){
-        Intent intent = new Intent(this, TimerService.class);
-        stopService(intent);
+        TimerService.stop(this, conn);
     }
 
 }

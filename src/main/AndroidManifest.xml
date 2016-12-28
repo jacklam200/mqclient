@@ -95,7 +95,8 @@
             </intent-filter>-->
         </activity>
 
-        <service android:name="cn.mqclient.service.SubscriberService"  >
+        <service android:name="cn.mqclient.service.SubscriberService"
+            android:process=":remote" android:exported="true" android:enabled="true">
             <intent-filter android:priority="1000" >
                 <action android:name="cn.mqclient.service.SubscriberService" />
             </intent-filter>
@@ -110,7 +111,8 @@
                 <action android:name="cn.mqclient.service.MediaService" />
             </intent-filter>
         </service>
-        <service android:name="cn.mqclient.service.TimerService" >
+        <service android:name="cn.mqclient.service.TimerService"
+            android:process=":remote" android:exported="true" android:enabled="true">
             <intent-filter android:priority="1000" >
                 <action android:name="cn.mqclient.service.TimerService" />
             </intent-filter>
@@ -125,23 +127,30 @@
                 <action android:name="cn.mqclient.service.autoTake.CameraService" />
             </intent-filter>
         </service>
-
+        <receiver android:name="cn.mqclient.receiver.PlayReceiver">
+            <intent-filter>
+                <action android:name="cn.mqclient.receiver.PlayReceiver" />
+                </intent-filter>
+            </receiver>
 
         <receiver android:name="cn.mqclient.service.FSStarterReceiver"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="cn.mqclient.service.StarterReceiver" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </receiver>
 
-        <!--<receiver android:name="cn.mqclient.receiver.BootReceiver">
+        <receiver android:name="cn.mqclient.receiver.BootReceiver"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED">
                 </action>
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </receiver>-->
+        </receiver>
 
         <!-- third party -->
         <!-- baidu location -->

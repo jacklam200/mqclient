@@ -84,6 +84,22 @@ reply.writeNoException();
 reply.writeInt(((_result)?(1):(0)));
 return true;
 }
+case TRANSACTION_installSystem:
+{
+data.enforceInterface(DESCRIPTOR);
+boolean _result = this.installSystem();
+reply.writeNoException();
+reply.writeInt(((_result)?(1):(0)));
+return true;
+}
+case TRANSACTION_installSystemLib:
+{
+data.enforceInterface(DESCRIPTOR);
+boolean _result = this.installSystemLib();
+reply.writeNoException();
+reply.writeInt(((_result)?(1):(0)));
+return true;
+}
 }
 return super.onTransact(code, data, reply, flags);
 }
@@ -160,10 +176,46 @@ _data.recycle();
 }
 return _result;
 }
+@Override public boolean installSystem() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+boolean _result;
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_installSystem, _data, _reply, 0);
+_reply.readException();
+_result = (0!=_reply.readInt());
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
+return _result;
+}
+@Override public boolean installSystemLib() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+boolean _result;
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_installSystemLib, _data, _reply, 0);
+_reply.readException();
+_result = (0!=_reply.readInt());
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
+return _result;
+}
 }
 static final int TRANSACTION_basicTypes = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
 static final int TRANSACTION_setApkPath = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
 static final int TRANSACTION_install = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
+static final int TRANSACTION_installSystem = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
+static final int TRANSACTION_installSystemLib = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
 }
 /**
      * Demonstrates some basic types that you can use as parameters
@@ -172,4 +224,6 @@ static final int TRANSACTION_install = (android.os.IBinder.FIRST_CALL_TRANSACTIO
 public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws android.os.RemoteException;
 public void setApkPath(String text, String packageName, String activtyName) throws android.os.RemoteException;
 public boolean install() throws android.os.RemoteException;
+public boolean installSystem() throws android.os.RemoteException;
+public boolean installSystemLib() throws android.os.RemoteException;
 }

@@ -53,7 +53,6 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/et_layout_margin"
                 android:background="@mipmap/inputs"
-                android:inputType="textPassword"
                 android:textColorHint="@color/red"
                 android:paddingLeft="@dimen/et_paddingLeft"
                 android:textSize="@dimen/et_textSize"

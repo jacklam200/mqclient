@@ -245,9 +245,9 @@ public class SubscriberService extends RabbitReaderService {
         Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
         Long times = (Long)data.getData();
 
-        String date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(times));
+        String date = new SimpleDateFormat("yyyy-MM-dd hh:mm", Locale.CHINA).format(new Date(times));
         String day = date.substring(0, 10);
-        String time = date.substring(11, 19);
+        String time = date.substring(11, 16);
 
         if(times != null)
             OsUtils.setPowerOn( day, time);
@@ -262,9 +262,9 @@ public class SubscriberService extends RabbitReaderService {
         Log.d("FullscreenActivity", "TIMED_SHUTDOWN cmd data:" + msg);
         Long times = (Long)data.getData();
 
-        String date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(times));
+        String date = new SimpleDateFormat("yyyy-MM-dd hh:mm", Locale.CHINA).format(new Date(times));
         String day = date.substring(0, 10);
-        String time = date.substring(11, 19);
+        String time = date.substring(11, 16);
         if(times != null)
             OsUtils.setPowerOff( day, time);
     }

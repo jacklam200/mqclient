@@ -3,9 +3,12 @@ package cn.mqclient.service;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -35,6 +38,7 @@ import cn.mqclient.provider.OpLayerDao;
 import cn.mqclient.provider.ReadLayerDao;
 import cn.mqclient.provider.log.OpLogDao;
 import cn.mqclient.provider.log.ReadLogDao;
+import cn.mqclient.receiver.PlayReceiver;
 import cn.mqclient.utils.AppUtils;
 import cn.mqclient.utils.KeepAliveTask;
 import cn.mqclient.utils.ModuleFile;
@@ -60,18 +64,20 @@ public class TimerService extends IntentService {
     private ScreenTextManager textManager = new ScreenTextManager();
     private long mSendLogTime = 0;
     private long mDeleteLogTime = 0;
-    public static void start(Context context) {
-        startWithText(context, null);
+    public static void start(Context context, ServiceConnection conn) {
+        startWithText(context, conn, null);
     }
 
-    public static void startWithText(Context context, String text) {
+    public static void startWithText(Context context, ServiceConnection conn, String text) {
         Intent starter = new Intent(context, TimerService.class);
         starter.putExtra(TEXT, text);
+//        context.bindService(starter, conn, BIND_AUTO_CREATE);
         context.startService(starter);
     }
-    public static void stop(Context context) {
+    public static void stop(Context context, ServiceConnection conn) {
         Log.d("jacklam", " stop TimerService");
         Intent starter = new Intent(context, TimerService.class);
+//        context.unbindService(conn);
         context.stopService(starter);
     }
 
@@ -108,6 +114,17 @@ public class TimerService extends IntentService {
 
         if(keepAlive != null)
             keepAlive.destroyKeepService(this, this, KeepAliveTask.NOTIFICATION_ID_TIMER);
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return super.onBind(intent);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        return super.onUnbind(intent);
     }
 
     @Override
@@ -179,6 +196,7 @@ public class TimerService extends IntentService {
                 public void run() {
                     List<cn.mqclient.provider.log.Log> mLogs =
                             ReadLogDao.getInstance(App.getInstance()).readSendLog(SharePref.getInstance().getString(SpConstants.WARRANTNO, ""));
+                    Log.d("jacklam", "sendlog:" + (mLogs != null ?mLogs.size():0));
                     if(mLogs != null && mLogs.size() > 0){
                         PlayLog log = new PlayLog();
                         log.setWARRANTNO(SharePref.getInstance().getString(SpConstants.WARRANTNO, ""));
@@ -252,20 +270,33 @@ public class TimerService extends IntentService {
         if(list != null && list.size() > 0){
             Log.d(this.getClass().getName(), "read layer Db size:" + list.size());
             for(int i = 0; i < list.size(); i++){
-                List<ComponentData> clist = JSON.parseArray(list.get(i).getJson(), ComponentData.class);
 
-                if(clist != null){
-
-//                    clist.getData().get(0).setId(list.get(i).getId());
+                if(list.get(i) != null){
                     OpLayerDao.getInstance(App.getInstance()).delete(list.get(i));
-
                     ModuleFile file = new ModuleFile("");
                     file.write(list.get(i).getName(), JSON.toJSONString(list.get(i)));
+                    Intent intent = new Intent();
+                    intent.setAction(PlayReceiver.INTENT_PLAY_RECEIVER);
+                    intent.putExtra(PlayReceiver.JSON_EXTRA, (list.get(i).getJson()));
+                    intent.putExtra(PlayReceiver.LAYER_EXTRA, (Parcelable) list.get(i));
                     Log.d(this.getClass().getName(), "read layer Db notify:"  + i);
-                    PSubject.getInstance().notify(list.get(i),
-                            clist, list.get(i).getName());
-
+                    App.getInstance().sendBroadcast(intent);
                 }
+
+//                List<ComponentData> clist = JSON.parseArray(list.get(i).getJson(), ComponentData.class);
+//
+//                if(clist != null){
+//
+////                    clist.getData().get(0).setId(list.get(i).getId());
+//                    OpLayerDao.getInstance(App.getInstance()).delete(list.get(i));
+//
+//                    ModuleFile file = new ModuleFile("");
+//                    file.write(list.get(i).getName(), JSON.toJSONString(list.get(i)));
+//                    Log.d(this.getClass().getName(), "read layer Db notify:"  + i);
+//                    PSubject.getInstance().notify(list.get(i),
+//                            clist, list.get(i).getName());
+//
+//                }
 
             }
         }

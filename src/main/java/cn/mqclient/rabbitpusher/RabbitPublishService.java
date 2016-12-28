@@ -48,7 +48,7 @@ public class RabbitPublishService implements Runnable {
             channelServer.queueDeclare(SERVER_NAME, true, false, false, null);
             if(!TextUtils.isEmpty(serverName))
                 channelServer.basicPublish("", serverName, null, msg.getBytes());
-
+            Log.d(this.getClass().getName(), "send msg:" + msg);
             if(connectionServer != null) {
                 try {
 

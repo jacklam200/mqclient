@@ -10,20 +10,28 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.SurfaceView;
+
+import com.alibaba.fastjson.JSON;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import cn.mqclient.Config;
+import cn.mqclient.Layer.common.PSubject;
 import cn.mqclient.Log;
 import cn.mqclient.async.IResponse;
+import cn.mqclient.entity.ComponentData;
 import cn.mqclient.entity.UploadData;
 import cn.mqclient.http.upload.FileChunk;
+import cn.mqclient.provider.Layer;
+import cn.mqclient.receiver.PlayReceiver;
 import cn.mqclient.repository.FileUploadRepository;
 import cn.mqclient.repository.base.Repository;
 import cn.mqclient.utils.CaptureScreen;
@@ -50,6 +58,19 @@ public class CameraService extends Service implements Camera.PictureCallback {
         context.startService(starter);
     }
 
+    public static void startProgram(Context context, String id,
+                                    String json, Layer layer) {
+
+        Intent starter = new Intent(context, CameraService.class);
+        starter.putExtra("type", "program");
+        starter.putExtra("commandId", id);
+        starter.putExtra(PlayReceiver.JSON_EXTRA, json);
+        starter.putExtra(PlayReceiver.LAYER_EXTRA, (Parcelable) layer);
+        context.startService(starter);
+    }
+
+
+
     private Camera mCamera;
 
     private boolean isRunning; // 是否已在监控拍照
@@ -73,15 +94,38 @@ public class CameraService extends Service implements Camera.PictureCallback {
             if(!TextUtils.isEmpty(type)){
 
                 if(type.compareToIgnoreCase("record") == 0){
+                    Log.d(this.getClass().getName(), "recordScreen");
                     recordScreen(intent);
+                }
+                else if(type.compareToIgnoreCase("program") == 0){
+                    Log.d(this.getClass().getName(), "program");
+                    program(intent);
                 }
             }
         }
         else{
+            Log.d(this.getClass().getName(), "startTakePic");
             startTakePic(intent);
         }
 
         return START_NOT_STICKY;
+    }
+
+    private void program(Intent intent){
+        Log.d(this.getClass().getName(), "program method start");
+        final  String json = intent.getStringExtra(PlayReceiver.JSON_EXTRA);
+        final Layer lay = intent.getParcelableExtra(PlayReceiver.LAYER_EXTRA);
+        Log.d(this.getClass().getName(), "program method start lay:" + lay.getName());
+        if(!TextUtils.isEmpty(json)){
+
+            List<ComponentData> clist = JSON.parseArray(json, ComponentData.class);
+            Log.d(this.getClass().getName(), "program notify");
+            PSubject.getInstance().notify(lay,
+                    clist, lay.getName());
+
+        }
+
+        Log.d(this.getClass().getName(), "program method end");
     }
 
     private void recordScreen(Intent intent) {

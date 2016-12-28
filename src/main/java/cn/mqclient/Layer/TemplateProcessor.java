@@ -100,8 +100,9 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
                 }
                 reset();
                 mDataList.clear();
-                mDataList.addAll(list);
+
                 if(list != null && list.size() > 0){
+                    mDataList.addAll(list);
                     mList.addAll(mDataList.get(currentIndex()).getProgrammeItems());
                     enter(mDataList.get(currentIndex()).getId(), mDataList.get(currentIndex()).getTemplate());
                 }
@@ -246,9 +247,9 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
 
         if(mDataList != null && mDataList.size() > 0){
             totalTime += 1000;
-            if(totalTime >= mDataList.get(currentIndex()).getTimeLenght()){
-                notifyDataSetChange();
+            if(totalTime >= (mDataList.get(currentIndex()).getTimeLenght() * 1000)){
                 totalTime = 0;
+                notifyDataSetChange();
                 enter(mDataList.get(currentIndex()).getId(), mDataList.get(currentIndex()).getTemplate());
             }
         }

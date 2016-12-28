@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.mqclient.Layer.TemplateProcessor;
+import cn.mqclient.Log;
 import cn.mqclient.entity.Component;
 import cn.mqclient.entity.ComponentData;
 import cn.mqclient.provider.Layer;
@@ -90,11 +91,16 @@ public class LayerAdapter extends BaseAdapter<Component> implements BaseAdapter.
                             data.getId().compareToIgnoreCase(((Component) this.getItem(i)).getGroupId()) == 0) {
                         continue;
                     } else {
-                        ((Component) this.getItem(i)).setGroupId(data.getId());
-                        // 用于让模块检查时间是否到达
-                        ((Component) this.getItem(i)).setBroadcastEndTime(data.getEnd_time().getTime());
-                        ((Component) this.getItem(i)).setBroadcastStartTime(data.getBegin_time().getTime());
-                        utils.notifyDataSetChange(i, list, (Component) this.getItem(i), template);
+                        Log.d(this.getClass().getName(), "dst Template:" + template);
+                        Log.d(this.getClass().getName(), "current Template:" + ((Component) this.getItem(i)).getTemplate());
+                        if(template.compareToIgnoreCase(((Component) this.getItem(i)).getTemplate()) == 0){
+                            ((Component) this.getItem(i)).setGroupId(data.getId());
+                            // 用于让模块检查时间是否到达
+                            ((Component) this.getItem(i)).setBroadcastEndTime(data.getEnd_time().getTime());
+                            ((Component) this.getItem(i)).setBroadcastStartTime(data.getBegin_time().getTime());
+                            utils.notifyDataSetChange(i, list, (Component) this.getItem(i), template);
+                        }
+
 
                     }
 

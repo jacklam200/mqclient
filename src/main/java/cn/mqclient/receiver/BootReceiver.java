@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import cn.mqclient.App;
 import cn.mqclient.FullscreenActivity;
+import cn.mqclient.LaucherActivity;
 import cn.mqclient.entity.http.MQConfigEntity;
 import cn.mqclient.service.SubscriberService;
 
@@ -14,15 +15,17 @@ import cn.mqclient.service.SubscriberService;
  */
 
 public class BootReceiver extends BroadcastReceiver {
-
+    private static final String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
     @Override
     public void onReceive(Context context, Intent intent) {
-        MQConfigEntity.MQConfig config = new MQConfigEntity.MQConfig();
-        config.getInfo();
-        if(config.isSuccess()){
-            SubscriberService.start(App.getInstance(), config);
-            FullscreenActivity.startNewTask(context);
+
+        if (intent.getAction().equalsIgnoreCase(BOOT_COMPLETED)) {
+            Intent intent1 = new Intent(context, LaucherActivity.class);
+            intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent1);
         }
+
+
 
     }
 }

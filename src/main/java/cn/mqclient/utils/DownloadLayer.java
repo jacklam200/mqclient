@@ -56,10 +56,11 @@ public class DownloadLayer implements DownloadTaskListener {
                 resCollect(data);
 
                 if(mList.size() > 0){
-                    for(int i = 0; i < data.size(); i++){
-                        data.get(i).setId(cmd.getId());
-                        findResToDownload(data.get(i).getProgrammeItems());
-                    }
+                    resToDownload(mList);
+//                    for(int i = 0; i < data.size(); i++){
+//                        data.get(i).setId(cmd.getId());
+//                        findResToDownload(data.get(i).getProgrammeItems());
+//                    }
                 }
                 else{
                     dispatchLayer(mLayer, DownloadStatus.DOWNLOAD_STATUS_COMPLETED, "100%");
@@ -94,7 +95,13 @@ public class DownloadLayer implements DownloadTaskListener {
 
         Log.d(this.getClass().getName(), "collect list:" + mList.toString());
     }
-
+    private void resToDownload(List<String> list) {
+        if(list != null){
+            for(int j = 0; j < list.size(); j++){
+                startDownload(list.get(j));
+            }
+        }
+    }
     private void findResToDownload(List<Component> programmeItems) {
 
         if(programmeItems != null){
@@ -113,6 +120,27 @@ public class DownloadLayer implements DownloadTaskListener {
         }
     }
 
+    private void startDownload(String url){
+
+        if(!TextUtils.isEmpty(url)){
+
+            DownloadEntity entity = new DownloadEntity();
+            entity.setUrl(url);
+            entity.setDownloadId(url);
+            entity.setIndex(url);
+            entity.setAction("download");
+            DownloadTask task = generateDownloadTask(entity);
+            Log.d(this.getClass().getName(), "startDownload id:" + task.getId());
+            Log.d(this.getClass().getName(), "startDownload:" + task.getUrl());
+            DownloadManager.getInstance(App.getInstance()).addDownloadTask(task, this);
+
+
+        }
+//        else{
+//            onCompleted(null);
+//        }
+    }
+
     private void startDownload(PieceMaterialModel model){
 
         if(!TextUtils.isEmpty(model.getUrl())){
@@ -126,6 +154,7 @@ public class DownloadLayer implements DownloadTaskListener {
             Log.d(this.getClass().getName(), "startDownload id:" + task.getId());
             Log.d(this.getClass().getName(), "startDownload:" + task.getUrl());
             DownloadManager.getInstance(App.getInstance()).addDownloadTask(task, this);
+
 
         }
 //        else{
@@ -224,7 +253,7 @@ public class DownloadLayer implements DownloadTaskListener {
     private void sendDoneMsg(Command cmd, String percent){
         if(cmd != null && !TextUtils.isEmpty(cmd.getServerName())){
             cmd.setState(Command.CMD_DONE);
-            cmd.setData(""+percent);
+            cmd.setReback(""+percent);
             String msg =  JSON.toJSONString(cmd);
             RabbitPublishService service = new RabbitPublishService(cmd.getServerName());
             service.send(msg);
@@ -234,7 +263,7 @@ public class DownloadLayer implements DownloadTaskListener {
     private void sendUnDoneMsg(Command cmd, String msg1){
         if(cmd != null && !TextUtils.isEmpty(cmd.getServerName())){
             cmd.setState(Command.CMD_UNDONE);
-            cmd.setData("download failed:" + msg1);
+            cmd.setReback("download failed:" + msg1);
             String msg =  JSON.toJSONString(cmd);
             RabbitPublishService service = new RabbitPublishService(cmd.getServerName());
             service.send(msg);

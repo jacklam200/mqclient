@@ -34,6 +34,7 @@ import cn.mqclient.http.download.base.DownloadManager;
 import cn.mqclient.http.download.base.DownloadStatus;
 import cn.mqclient.http.download.base.DownloadTask;
 import cn.mqclient.http.download.base.DownloadTaskListener;
+import cn.mqclient.provider.Layer;
 import cn.mqclient.provider.log.OpLogDao;
 import cn.mqclient.provider.log.ReadLogDao;
 import cn.mqclient.service.DownloadService;
@@ -48,7 +49,7 @@ import cn.mqclient.widget.IViewLifeCycle;
  * 需要清除操作，比如关闭视频
  * Created by LinZaixiong on 2016/9/9.
  */
-public abstract class BaseProcessor<T extends View>  implements Serializable, IViewLifeCycle, Observer<ComponentData, Component>, InactivityTimer.OnTimer {
+public abstract class BaseProcessor<T extends View>  implements Serializable, IViewLifeCycle, Observer<Layer, ComponentData>, InactivityTimer.OnTimer {
     public static final int KEY_TAG = R.id.tag_processor;
     public static final int MSG_WHAT = 0x01;
 //    private transient List<String> taskIds = new ArrayList<>();
@@ -357,7 +358,7 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
 //        }
 //    };
 
-    public void Update(ComponentData data, List<Component> list, String template){
+    public void Update(Layer data, List<ComponentData> list, String template){
 
     }
 

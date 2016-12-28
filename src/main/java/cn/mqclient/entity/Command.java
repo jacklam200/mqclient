@@ -8,7 +8,7 @@ import java.io.Serializable;
  * Created by KangXinghua on 2016/8/26.
  */
 public class Command implements Serializable{
-
+    private static final long serialVersionUID = 1234567890L;
     public static final int CMD_RECEIVE = 100;
     public static final int CMD_DONE = 101;
     public static final int CMD_UNDONE = 102;
@@ -19,9 +19,18 @@ public class Command implements Serializable{
     private Integer state;
     @JSONField(serialize = false)
     private String content;
+    private String reback;
 
     private String message;
     private java.lang.String serverName;
+
+    public String getReback() {
+        return reback;
+    }
+
+    public void setReback(String reback) {
+        this.reback = reback;
+    }
 
     public String getId() {
         return id;

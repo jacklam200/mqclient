@@ -46,6 +46,10 @@ public class UpdateApk {
                 InputStream is = null;
                 FileOutputStream os = null;
                 File file = null;
+//                if(listener != null){
+//                    listener.onComplete(0, path);
+//                    return;
+//                }
                 HttpURLConnection mConnection = null;
 
                 try {

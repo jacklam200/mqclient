@@ -24,6 +24,7 @@ import java.util.List;
 import cn.kanwah.installservice.InstallInterface;
 import cn.mqclient.App;
 import cn.mqclient.Log;
+import cn.mqclient.utils.AppUtils;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -56,18 +57,44 @@ public class InstallController {
 
     public void unBind(Context context){
 
-//        Intent service = new Intent(InstallInterface.class.getName());
-//        context.unbindService(connection);
+        Intent service = new Intent(InstallInterface.class.getName());
+        context.unbindService(connection);
     }
 
     public void install(String apkPath) throws RemoteException{
 
         iservice.setApkPath(apkPath, getPackageName(apkPath), getPackageName(apkPath) + ".LaucherActivity");
-        if(iservice.install()){
-            Log.d("jacklam", "install success");
+
+        if(AppUtils.isUserApp(getPackageInfo(AppUtils.getAppPackageName(App.getInstance())))){
+
+            if(iservice.install()){
+                Log.d("jacklam", "install success");
+            }
+        }
+        else{
+            if(iservice.installSystem()){
+                Log.d("jacklam", "install success");
+            }
         }
 
+
         Log.d("jacklam", "install");
+    }
+
+    private PackageInfo getPackageInfo(String packageName){
+        PackageInfo info = null;
+
+        List<PackageInfo> packlist = App.getInstance().getPackageManager().getInstalledPackages(0);
+        for (int i = 0; i < packlist.size(); i++) {
+
+            if(!TextUtils.isEmpty(packlist.get(i).packageName) &&
+                    packlist.get(i).packageName.compareToIgnoreCase(packageName) == 0){
+                info = packlist.get(i);
+                break;
+            }
+        }
+
+        return info;
     }
 
     private String getPackageName(String apkPath){
@@ -103,6 +130,7 @@ public class InstallController {
         }
         return false;
     }
+
     public static boolean isCanInstall(Context context, String packageName, int versionCode){
         boolean isRet = true;
 
