@@ -238,15 +238,17 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
         Log.d(this.getClass().getName(), "log TerminalGroupItemName:" + temp);
         exit();
         if(this instanceof TemplateProcessor){
+            if( App.IS_IN){
+                Log.d(this.getClass().getName(), "log enter  TemplateProcessor:" + id);
 
-            Log.d(this.getClass().getName(), "log enter  TemplateProcessor:" + id);
+                recorder =
+                        new LogRecorder(id, temp,
+                                SharePref.getInstance().getString(SpConstants.WARRANTNO, ""),
+                                System.currentTimeMillis(), System.currentTimeMillis(), System.currentTimeMillis());
+                Log.d(this.getClass().getName(), "log start:" + id);
+                recorder.start();
+            }
 
-            recorder =
-                    new LogRecorder(id, temp,
-                            SharePref.getInstance().getString(SpConstants.WARRANTNO, ""),
-                            System.currentTimeMillis(), System.currentTimeMillis(), System.currentTimeMillis());
-            Log.d(this.getClass().getName(), "log start:" + id);
-            recorder.start();
         }
         else{
 
@@ -257,9 +259,12 @@ public abstract class BaseProcessor<T extends View>  implements Serializable, IV
     protected void exit(){
 
         if(this instanceof TemplateProcessor){
-            if(recorder != null){
-                recorder.end();
+            if( App.IS_IN){
+                if(recorder != null){
+                    recorder.end();
+                }
             }
+
         }
         else{
 

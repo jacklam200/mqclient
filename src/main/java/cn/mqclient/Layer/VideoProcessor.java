@@ -45,6 +45,7 @@ public class VideoProcessor extends BaseProcessor<IjkVideoView> implements IMedi
     @Override
     public IjkVideoView makeView(Context context, Component item) {
         IjkVideoView view = new IjkVideoView(context);
+        view.setBackgroundColor(0x00ffffff);
         view.setOnCompletionListener(this);
         view.setOnPreparedListener(this);
         view.setOnErrorListener(this);

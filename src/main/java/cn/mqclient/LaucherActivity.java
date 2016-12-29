@@ -23,6 +23,7 @@ public class LaucherActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_launcher);
+
         if(InstallController.hasRootPerssion()){
             Log.d("jacklam", "has root permission");
         }

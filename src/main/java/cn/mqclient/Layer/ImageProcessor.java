@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
@@ -122,7 +123,7 @@ public class ImageProcessor extends BaseProcessor<FrameLayout> implements Inacti
                if(totolMs >= getTimes(model.get(mIndex).getDay(),
                                 model.get(mIndex).getHour(),
                                 model.get(mIndex).getMinute(),
-                                model.get(mIndex).getSeconds())){
+                                model.get(mIndex).getSeconds()) && totolMs >= 1000){
                    totolMs = 0;
                    mIndex++;
                    if(mIndex >= model.size()){
@@ -141,10 +142,14 @@ public class ImageProcessor extends BaseProcessor<FrameLayout> implements Inacti
         if(pos == mIndex){
             if(data != null){
                 if(pos == 0){
-                    Glide.with(mContext).load("file://" + filePath).into(mImageView);
+                    Log.d(this.getClass().getName(), "play url:" + url);
+                    Log.d(this.getClass().getName(), "play filePath:" + filePath);
+                    Glide.with(mContext).load("file://" + filePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(mImageView);
                 }
                 else{
-                    Glide.with(mContext).load("file://" + filePath).into(mImageView);
+                    Log.d(this.getClass().getName(), "play url:" + url);
+                    Log.d(this.getClass().getName(), "play filePath:" + filePath);
+                    Glide.with(mContext).load("file://" + filePath).diskCacheStrategy(DiskCacheStrategy.ALL).into(mImageView);
                 }
 
             }

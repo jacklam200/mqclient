@@ -87,22 +87,31 @@ public class LayerAdapter extends BaseAdapter<Component> implements BaseAdapter.
 
                 for (int i = 0; i < this.getCount(); i++) {
                     // 命令id不同，刷新界面，相同不刷新
-                    if (data != null && !TextUtils.isEmpty(data.getCmd_id()) && !TextUtils.isEmpty(((Component) this.getItem(i)).getGroupId()) &&
-                            data.getId().compareToIgnoreCase(((Component) this.getItem(i)).getGroupId()) == 0) {
-                        continue;
-                    } else {
-                        Log.d(this.getClass().getName(), "dst Template:" + template);
-                        Log.d(this.getClass().getName(), "current Template:" + ((Component) this.getItem(i)).getTemplate());
-                        if(template.compareToIgnoreCase(((Component) this.getItem(i)).getTemplate()) == 0){
-                            ((Component) this.getItem(i)).setGroupId(data.getId());
-                            // 用于让模块检查时间是否到达
-                            ((Component) this.getItem(i)).setBroadcastEndTime(data.getEnd_time().getTime());
-                            ((Component) this.getItem(i)).setBroadcastStartTime(data.getBegin_time().getTime());
-                            utils.notifyDataSetChange(i, list, (Component) this.getItem(i), template);
-                        }
-
-
+                    Log.d(this.getClass().getName(), "dst Template:" + template);
+                    Log.d(this.getClass().getName(), "current Template:" + ((Component) this.getItem(i)).getTemplate());
+                    if(template.compareToIgnoreCase(((Component) this.getItem(i)).getTemplate()) == 0){
+                        ((Component) this.getItem(i)).setGroupId(data.getId());
+                        // 用于让模块检查时间是否到达
+                        ((Component) this.getItem(i)).setBroadcastEndTime(data.getEnd_time().getTime());
+                        ((Component) this.getItem(i)).setBroadcastStartTime(data.getBegin_time().getTime());
+                        utils.notifyDataSetChange(i, list, (Component) this.getItem(i), template);
                     }
+//                    if (data != null && !TextUtils.isEmpty(data.getCmd_id()) && !TextUtils.isEmpty(((Component) this.getItem(i)).getGroupId()) &&
+//                            data.getId().compareToIgnoreCase(((Component) this.getItem(i)).getGroupId()) == 0) {
+//                        continue;
+//                    } else {
+//                        Log.d(this.getClass().getName(), "dst Template:" + template);
+//                        Log.d(this.getClass().getName(), "current Template:" + ((Component) this.getItem(i)).getTemplate());
+//                        if(template.compareToIgnoreCase(((Component) this.getItem(i)).getTemplate()) == 0){
+//                            ((Component) this.getItem(i)).setGroupId(data.getId());
+//                            // 用于让模块检查时间是否到达
+//                            ((Component) this.getItem(i)).setBroadcastEndTime(data.getEnd_time().getTime());
+//                            ((Component) this.getItem(i)).setBroadcastStartTime(data.getBegin_time().getTime());
+//                            utils.notifyDataSetChange(i, list, (Component) this.getItem(i), template);
+//                        }
+//
+//
+//                    }
 
                 }
             }

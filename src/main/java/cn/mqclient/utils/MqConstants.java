@@ -8,7 +8,7 @@ public interface MqConstants extends SpConstants {
     String CMD_SPLIT = "10";
     String CMD_PROGRAM = "20";
     String CMD_REBOOT = "30";
-    String CMD_LOCK = "1";
+    String CMD_LOCK = "2";
 
     String TIMED_SHUTDOWN = "40"; // 定时关机 data 里的是 关机时间
     String TIMING_BOOT = "50"; // 定时开机 data 里的是 开机时间

@@ -193,7 +193,7 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
 
         if(isExpire(timeMs)){// 过期超时不播放此节目
 
-            InactivityTimer.getInstance().cancel();
+//            InactivityTimer.getInstance().cancel();
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                              @Override
@@ -246,7 +246,7 @@ public class TemplateProcessor extends BaseProcessor<LayerListView> implements I
     private void playNextPrograme(long timeMs) {
 
         if(mDataList != null && mDataList.size() > 0){
-            totalTime += 1000;
+            totalTime += timeMs;
             if(totalTime >= (mDataList.get(currentIndex()).getTimeLenght() * 1000)){
                 totalTime = 0;
                 notifyDataSetChange();

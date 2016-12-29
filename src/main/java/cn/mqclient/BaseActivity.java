@@ -21,6 +21,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 //    private InstallController installController;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        App.IS_IN = true;
         super.onCreate(savedInstanceState);
         File file = new File(Environment.getExternalStorageDirectory().getPath() + "/mqclient");
         if(!file.exists())

@@ -19,7 +19,7 @@ import okhttp3.OkHttpClient;
 public class App extends BaseApplication {
 
     private static App mInstance = null;
-
+    public static boolean IS_IN = false;
     public static ServiceManager mServiceManager = null;
     private static String rootPath = "/mymusic";
     private String latitude = "-1"; // 维

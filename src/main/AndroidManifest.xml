@@ -124,7 +124,7 @@
         </service>
         <service android:name="cn.mqclient.widget.media.MediaPlayerService"  >
             <intent-filter android:priority="1000" >
-                <action android:name="cn.mqclient.service.autoTake.CameraService" />
+                <action android:name="cn.mqclient.widget.media.MediaPlayerService" />
             </intent-filter>
         </service>
         <receiver android:name="cn.mqclient.receiver.PlayReceiver">

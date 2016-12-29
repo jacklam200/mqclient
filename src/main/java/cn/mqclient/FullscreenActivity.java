@@ -65,6 +65,7 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
     private String moduleId = "";
     private String lockId = "";
     private LayerListView mq_list;
+    HomeKeyEventBroadCastReceiver receiver1 = new HomeKeyEventBroadCastReceiver();
     private ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -273,6 +274,8 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen);
+        registerReceiver(receiver1, new IntentFilter(
+                Intent. ACTION_CLOSE_SYSTEM_DIALOGS));
         PSubject.getInstance().register(this);
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
@@ -431,10 +434,20 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
         delayedHide(1);
     }
 
+
+
+
+    private class HomeKeyEventBroadCastReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            App.IS_IN = false;
+        }
+    }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-
+            App.IS_IN = false;
             moveTaskToBack(false);
             Intent home = new Intent(Intent.ACTION_MAIN);
 //            home.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -491,6 +504,8 @@ public class FullscreenActivity extends BaseActivity implements Observer<Layer, 
 
     @Override
     protected void onDestroy() {
+        App.IS_IN = false;
+        this.unregisterReceiver(receiver1);
         super.onDestroy();
         if(mList != null)
             mList.clear();

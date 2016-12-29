@@ -38,10 +38,11 @@ public class AudioProcessor extends BaseProcessor<View> implements MusicConstant
     private List<PieceMaterialModel> songs;
     boolean isInit = false;
     private int mIndex = 0;
+    private Component mItem;
 
     public AudioProcessor(Context context, String template){
         super(context, template);
-        initConnection();
+
     }
 
     @Override
@@ -57,13 +58,9 @@ public class AudioProcessor extends BaseProcessor<View> implements MusicConstant
     @Override
     public void execute(Context context, Component item) {
         super.execute(context, item);
+        mItem = item;
+        initConnection();
 
-        if(item != null && item.getFile() != null && item.getFile().size()> 0){
-            songs = item.getFile();
-            addDownloadTask(item.getFile().get(mIndex).getUrl(), item.getFile().get(mIndex).getPieceId(), item.getFile().get(mIndex).getId());
-//            addDownloadTask(item.getFile().get(mIndex).getUrl(), data.getId(), getAction());
-
-        }
 //        initSongs(songs);
 
     }
@@ -173,6 +170,12 @@ public class AudioProcessor extends BaseProcessor<View> implements MusicConstant
 //                        mCurMusicId = mService.getCurMusicId();
 //                        mPlayingSongPosition = MusicUtils.seekPosInListById(mMusicList, mCurMusicId);
 //                        initListView();
+                        if(mItem != null && mItem.getFile() != null && mItem.getFile().size()> 0){
+                            songs = mItem.getFile();
+                            addDownloadTask(mItem.getFile().get(mIndex).getUrl(), mItem.getFile().get(mIndex).getPieceId(), mItem.getFile().get(mIndex).getId());
+//            addDownloadTask(item.getFile().get(mIndex).getUrl(), data.getId(), getAction());
+
+                        }
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
